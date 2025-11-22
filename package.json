@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "flask-dev": "run-script-os",
-    "flask-dev:win32": ".venv\\Scripts\\activate && cross-env FLASK_DEBUG=1 FLASK_APP=api/index flask run -p 5328",
-    "flask-dev:darwin:linux": ". .venv/bin/activate && cross-env FLASK_DEBUG=1 FLASK_APP=api/index flask run -p 5328",
-    "flask-dev:default": "cross-env FLASK_DEBUG=1 FLASK_APP=api/index flask run -p 5328",
+    "flask-dev:win32": "npx cross-env FLASK_DEBUG=1 .venv\\Scripts\\python.exe -m flask --app api/index run -p 5328",
+    "flask-dev:darwin:linux": "npx cross-env FLASK_DEBUG=1 .venv/bin/python -m flask --app api/index run -p 5328",
+    "flask-dev:default": "npx cross-env FLASK_DEBUG=1 python -m flask --app api/index run -p 5328",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
     "build": "next build",
