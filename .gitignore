@@ -1,4 +1,74 @@
+# Node
 node_modules/
-.venv/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Next.js
 .next/
+.out/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Vercel
+.vercel/
+.vercel_build_output/
+
+# Python
+.venv/
+venv/
+ENV/
+env/
 __pycache__/
+*.py[cod]
+*$py.class
+.python-version
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
+dist/
+build/
+eggs/
+*.egg-info/
+*.egg
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Databases
+*.sqlite3
+*.db
+*.sqlite
+
+# Static
+public/static/
+
+# Misc
+.cache/
+coverage/
+
