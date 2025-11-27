@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "flask-dev": "run-script-os",
-    "flask-dev:win32": "npx cross-env FLASK_DEBUG=1 .venv\\Scripts\\python.exe -m flask --app api/index run -p 5328",
-    "flask-dev:darwin:linux": "npx cross-env FLASK_DEBUG=1 .venv/bin/python -m flask --app api/index run -p 5328",
-    "flask-dev:default": "npx cross-env FLASK_DEBUG=1 python -m flask --app api/index run -p 5328",
+    "flask-dev": "node scripts/flask-dev.js",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
     "build": "next build",
@@ -26,8 +23,7 @@
     "postcss": "^8.5.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "run-script-os": "^1.1.6",
     "tailwindcss": "3.3.2",
-    "typescript": "5.0.4"
+    "typescript": "^5.6.0"
   }
 }
