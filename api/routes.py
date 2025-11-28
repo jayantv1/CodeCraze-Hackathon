@@ -14,6 +14,32 @@ def health_check():
     db_instance = db()
     return jsonify({"status": "ok", "firebase": "connected" if db_instance else "disconnected"})
 
+@api.route('/api/auth/sync', methods=['POST'])
+def sync_user():
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    data = request.json
+    uid = data.get('uid')
+    email = data.get('email')
+    name = data.get('name')
+    
+    if not uid or not email:
+        return jsonify({"error": "Missing required fields"}), 400
+        
+    users_ref = db().collection('users')
+    user_doc = users_ref.document(uid).get()
+    
+    if not user_doc.exists:
+        users_ref.document(uid).set({
+            'uid': uid,
+            'email': email,
+            'name': name or 'Unknown',
+            'role': 'educator',
+            'createdAt': firestore.SERVER_TIMESTAMP
+        })
+        return jsonify({"message": "User created"}), 201
+    
+    return jsonify({"message": "User already exists"}), 200
+
 # --- GROUPS ---
 @api.route('/api/groups', methods=['GET'])
 def get_groups():
@@ -40,6 +66,7 @@ def create_group():
         'name': data['name'],
         'description': data.get('description', ''),
         'is_private': data.get('is_private', False),
+        'created_by': data.get('created_by'), # ID of the educator
         'created_at': firestore.SERVER_TIMESTAMP
     })
     return jsonify({"id": group_ref.id, "message": "Group created"}), 201
