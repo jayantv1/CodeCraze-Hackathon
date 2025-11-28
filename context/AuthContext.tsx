@@ -23,10 +23,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
+
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
 
-            if (currentUser) {
+            if (currentUser && db) {
                 // Fetch additional user data from Firestore
                 try {
                     const userDoc = await getDoc(doc(db, "users", currentUser.uid));

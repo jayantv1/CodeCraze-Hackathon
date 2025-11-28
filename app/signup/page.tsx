@@ -23,6 +23,7 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
+            if (!auth) throw new Error("Firebase auth not initialized");
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
@@ -51,6 +52,7 @@ export default function SignupPage() {
         setError("");
         setLoading(true);
         try {
+            if (!auth) throw new Error("Firebase auth not initialized");
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
