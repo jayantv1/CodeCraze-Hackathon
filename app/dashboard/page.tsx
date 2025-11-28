@@ -10,11 +10,14 @@ interface Post {
     created_at: any;
 }
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function Dashboard() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [newPost, setNewPost] = useState('');
     const [scope, setScope] = useState('school');
     const [loading, setLoading] = useState(true);
+    const { user, userData } = useAuth();
 
     useEffect(() => {
         fetchPosts();
@@ -42,7 +45,7 @@ export default function Dashboard() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newPost.trim()) return;
+        if (!newPost.trim() || !user) return;
 
         try {
             const res = await fetch('/api/posts', {
@@ -50,8 +53,8 @@ export default function Dashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     content: newPost,
-                    author_id: 'test-user-id', // TODO: Get from Auth
-                    author_name: 'Teacher User', // TODO: Get from Auth
+                    author_id: user.uid,
+                    author_name: userData?.name || user.displayName || user.email || 'Unknown User',
                     scope: scope
                 }),
             });
