@@ -158,3 +158,145 @@ def schedule_test():
     
     update_time, test_ref = db().collection('tests').add(test_data)
     return jsonify({"id": test_ref.id, "message": "Test scheduled"}), 201
+
+# --- CHANNELS ---
+@api.route('/api/channels', methods=['GET'])
+def get_channels():
+    db_instance = db()
+    if not db_instance:
+        return jsonify({"error": "Database not connected", "channels": []}), 200
+    try:
+        group_id = request.args.get('group_id')
+        channels_ref = db_instance.collection('channels')
+        
+        if group_id:
+            query = channels_ref.where('group_id', '==', group_id)
+        else:
+            query = channels_ref
+            
+        docs = query.stream()
+        channels = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        return jsonify(channels)
+    except Exception as e:
+        return jsonify({"error": str(e), "channels": []}), 500
+
+@api.route('/api/channels', methods=['POST'])
+def create_channel():
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    data = request.json
+    
+    required = ['name', 'group_id']
+    if not all(k in data for k in required):
+        return jsonify({"error": "Missing required fields"}), 400
+        
+    channel_data = {
+        'name': data['name'],
+        'group_id': data['group_id'],
+        'description': data.get('description', ''),
+        'is_private': data.get('is_private', False),
+        'created_at': firestore.SERVER_TIMESTAMP
+    }
+    
+    update_time, channel_ref = db().collection('channels').add(channel_data)
+    return jsonify({"id": channel_ref.id, "message": "Channel created"}), 201
+
+# --- MESSAGES ---
+@api.route('/api/messages', methods=['GET'])
+def get_messages():
+    db_instance = db()
+    if not db_instance:
+        return jsonify({"error": "Database not connected", "messages": []}), 200
+    try:
+        channel_id = request.args.get('channel_id')
+        limit_val = int(request.args.get('limit', 50))
+        
+        if not channel_id:
+            return jsonify({"error": "channel_id is required"}), 400
+            
+        messages_ref = db_instance.collection('messages')
+        
+        try:
+            # Try to query with ordering (requires index)
+            query = messages_ref.where('channel_id', '==', channel_id).order_by('created_at', direction=firestore.Query.DESCENDING).limit(limit_val)
+            docs = list(query.stream())
+        except Exception as index_error:
+            # If index doesn't exist or there's an error, fall back to simple query
+            print(f"Falling back to simple query: {index_error}")
+            query = messages_ref.where('channel_id', '==', channel_id).limit(limit_val)
+            docs = list(query.stream())
+        
+        messages = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        # Reverse to show oldest first (if we got them in descending order)
+        messages.reverse()
+        return jsonify(messages)
+    except Exception as e:
+        print(f"Error in get_messages: {e}")
+        return jsonify({"error": str(e), "messages": []}), 500
+
+@api.route('/api/messages', methods=['POST'])
+def create_message():
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    data = request.json
+    
+    required = ['content', 'author_id', 'author_name', 'channel_id']
+    if not all(k in data for k in required):
+        return jsonify({"error": "Missing required fields"}), 400
+        
+    message_data = {
+        'content': data['content'],
+        'author_id': data['author_id'],
+        'author_name': data['author_name'],
+        'channel_id': data['channel_id'],
+        'is_announcement': data.get('is_announcement', False),
+        'created_at': firestore.SERVER_TIMESTAMP
+    }
+    
+    update_time, message_ref = db().collection('messages').add(message_data)
+    return jsonify({"id": message_ref.id, "message": "Message sent"}), 201
+
+# --- GROUP MEMBERS ---
+@api.route('/api/groups/<group_id>/join', methods=['POST'])
+def join_group(group_id):
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    data = request.json
+    
+    user_id = data.get('user_id')
+    user_name = data.get('user_name')
+    
+    if not user_id or not user_name:
+        return jsonify({"error": "user_id and user_name are required"}), 400
+        
+    # Add user to group's members subcollection
+    member_data = {
+        'user_id': user_id,
+        'user_name': user_name,
+        'joined_at': firestore.SERVER_TIMESTAMP
+    }
+    
+    db().collection('groups').document(group_id).collection('members').document(user_id).set(member_data)
+    return jsonify({"message": "Joined group successfully"}), 200
+
+@api.route('/api/groups/<group_id>/leave', methods=['POST'])
+def leave_group(group_id):
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    data = request.json
+    
+    user_id = data.get('user_id')
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
+        
+    db().collection('groups').document(group_id).collection('members').document(user_id).delete()
+    return jsonify({"message": "Left group successfully"}), 200
+
+@api.route('/api/groups/<group_id>/members', methods=['GET'])
+def get_group_members(group_id):
+    db_instance = db()
+    if not db_instance:
+        return jsonify({"error": "Database not connected", "members": []}), 200
+    try:
+        members_ref = db_instance.collection('groups').document(group_id).collection('members')
+        docs = members_ref.stream()
+        members = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        return jsonify(members)
+    except Exception as e:
+        return jsonify({"error": str(e), "members": []}), 500

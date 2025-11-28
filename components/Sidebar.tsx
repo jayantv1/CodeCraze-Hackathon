@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -6,6 +8,7 @@ const Sidebar = () => {
 
     const links = [
         { href: '/dashboard', label: 'Stream' },
+        { href: '/chat', label: 'Messages' },
         { href: '/calendar', label: 'Calendar' },
         { href: '/groups', label: 'Groups' },
     ];
@@ -19,8 +22,8 @@ const Sidebar = () => {
                         key={link.href}
                         href={link.href}
                         className={`p-3 rounded-lg transition-colors ${pathname === link.href
-                                ? 'bg-blue-600 text-white'
-                                : 'hover:bg-gray-800 text-gray-300'
+                            ? 'bg-blue-600 text-white'
+                            : 'hover:bg-gray-800 text-gray-300'
                             }`}
                     >
                         {link.label}
