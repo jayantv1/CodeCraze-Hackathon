@@ -37,7 +37,7 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
             <div className="flex-1 flex items-center justify-center bg-gray-800">
                 <div className="text-center">
                     <div className="text-6xl mb-4">💬</div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to TeacherHub Messaging</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to LumFlare Messaging</h2>
                     <p className="text-gray-400">Select a group and channel to start chatting</p>
                 </div>
             </div>

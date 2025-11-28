@@ -30,7 +30,7 @@ const Sidebar = () => {
 
     return (
         <div className="w-64 bg-gray-900 text-white h-screen fixed left-0 top-0 flex flex-col p-4">
-            <h1 className="text-2xl font-bold mb-8 text-blue-400">TeacherHub</h1>
+            <h1 className="text-2xl font-bold mb-8 text-blue-400">LumFlare</h1>
             <nav className="flex flex-col gap-2">
                 {links.map((link) => (
                     <Link
