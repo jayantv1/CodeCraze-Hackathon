@@ -26,7 +26,6 @@ const Sidebar = () => {
         { href: '/dashboard', label: 'Stream' },
         { href: '/chat', label: 'Messages' },
         { href: '/calendar', label: 'Calendar' },
-        { href: '/groups', label: 'Groups' },
     ];
 
     return (
