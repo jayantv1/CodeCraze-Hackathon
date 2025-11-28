@@ -11,7 +11,7 @@ export default function LoginPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login attempt:', { email, password });
-        router.push('/chat');
+        router.push('/dashboard');
     };
 
     return (
@@ -26,7 +26,7 @@ export default function LoginPage() {
             <div className="relative z-10 w-full max-w-md p-8 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
-                        Teacher Connect
+                        TeacherHub
                     </h1>
                     <p className="text-gray-300 text-sm">
                         Agentic AI-powered collaboration for educators
