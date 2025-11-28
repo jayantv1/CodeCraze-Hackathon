@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login attempt:', { email, password });
-        // TODO: Implement actual authentication logic
+        router.push('/chat');
     };
 
     return (
