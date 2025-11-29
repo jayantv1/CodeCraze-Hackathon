@@ -1,6 +1,6 @@
 # CodeCraze-Hackathon
 <div align="center">
-  <img src="assets/screenshot.png" alt="LümFlare Screenshot" width="700">
+  <img src="assets/LumFlare_logo.webp" alt="LümFlare Logo" width="500">
   
   <h1>LümFlare</h1>
 </div>
