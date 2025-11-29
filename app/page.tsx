@@ -59,7 +59,7 @@ export default function LandingPage() {
                         Log In
                     </Link>
                     <Link href="/signup" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors">
-                        Get Started
+                        Contact Us
                     </Link>
                 </div>
             </nav>
@@ -91,10 +91,10 @@ export default function LandingPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-bold rounded-xl shadow-lg transform transition-all hover:scale-105">
-                            Start for Free
+                            Contact Us
                         </Link>
-                        <Link href="/login" className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white text-lg font-bold rounded-xl transition-all">
-                            Live Demo
+                        <Link href="/signup?demo=true" className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white text-lg font-bold rounded-xl transition-all">
+                            Request Demo
                         </Link>
                     </div>
                 </div>

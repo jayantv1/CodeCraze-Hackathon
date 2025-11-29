@@ -30,6 +30,36 @@ export default function LoginPage() {
         };
     }, []);
 
+    // Helper function to get user-friendly error messages
+    const getErrorMessage = (error: any): string => {
+        const errorCode = error.code;
+        const errorMessage = error.message || '';
+
+        // Check for domain registration errors
+        if (errorMessage.includes('DOMAIN_NOT_REGISTERED:')) {
+            return errorMessage.replace('DOMAIN_NOT_REGISTERED: ', '');
+        }
+
+        switch (errorCode) {
+            case 'auth/invalid-credential':
+            case 'auth/wrong-password':
+            case 'auth/user-not-found':
+                return 'Invalid email or password. Please check your credentials and try again.';
+            case 'auth/invalid-email':
+                return 'Please enter a valid email address.';
+            case 'auth/user-disabled':
+                return 'This account has been disabled. Please contact support.';
+            case 'auth/too-many-requests':
+                return 'Too many failed login attempts. Please try again later or reset your password.';
+            case 'auth/network-request-failed':
+                return 'Network error. Please check your internet connection and try again.';
+            case 'auth/popup-closed-by-user':
+                return 'Sign-in was cancelled. Please try again.';
+            default:
+                return errorMessage || 'An error occurred during sign in. Please try again.';
+        }
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -55,13 +85,18 @@ export default function LoginPage() {
                 const errorData = await syncRes.json();
                 // If sync fails (e.g. no org), sign them out immediately
                 await auth.signOut();
+
+                // Check if it's a domain registration error
+                if (errorData.message && errorData.message.includes('not registered')) {
+                    throw new Error('DOMAIN_NOT_REGISTERED: ' + errorData.message);
+                }
                 throw new Error(errorData.message || "Failed to sync user data");
             }
 
             router.push("/dashboard"); // Redirect to dashboard after login
         } catch (err: any) {
-            console.error(err);
-            setError(err.message || "Invalid email or password");
+            console.error('Login error:', err);
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -90,12 +125,18 @@ export default function LoginPage() {
             if (!syncRes.ok) {
                 const errorData = await syncRes.json();
                 await auth.signOut();
+
+                // Check if it's a domain registration error
+                if (errorData.message && errorData.message.includes('not registered')) {
+                    throw new Error('DOMAIN_NOT_REGISTERED: ' + errorData.message);
+                }
                 throw new Error(errorData.message || "Failed to sync user data");
             }
 
             router.push("/dashboard");
         } catch (err: any) {
-            setError(err.message);
+            console.error('Google login error:', err);
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -128,13 +169,28 @@ export default function LoginPage() {
             </div>
 
             <Card className="w-full max-w-md p-8 relative z-10">
+                {/* Back to Home Link */}
+                <Link href="/" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-4 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Back to Home
+                </Link>
+
                 <h2 className="text-2xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                     Welcome Back
                 </h2>
 
                 {error && (
                     <div className="bg-red-500/10 border border-red-400/50 text-red-300 px-4 py-3 rounded mb-4">
-                        {error}
+                        <p>{error}</p>
+                        {error.includes('not registered') && (
+                            <p className="mt-2 text-sm">
+                                <Link href="/signup" className="text-purple-400 hover:text-purple-300 underline">
+                                    Contact us to set up your organization →
+                                </Link>
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -216,9 +272,9 @@ export default function LoginPage() {
                 </div>
 
                 <div className="mt-4 text-center text-sm text-gray-400">
-                    Don't have an account?{" "}
+                    Want to bring LumFlare to your organization?{" "}
                     <Link href="/signup" className="text-purple-400 hover:text-purple-300 font-medium">
-                        Sign up
+                        Contact us
                     </Link>
                 </div>
             </Card>
