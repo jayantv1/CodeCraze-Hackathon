@@ -28,25 +28,25 @@ Additionally, this feature provides a smart calendar tool that enables teachers 
 How to set up the project and run it locally on your device:
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/jayantv1/CodeCraze-Hackathon
+    ```bash
+    git clone https://github.com/jayantv1/CodeCraze-Hackathon
+    cd CodeCraze-Hackathon
 
-## Commands to Install Dependencies
-npm install
+    # Install Dependencies
+    npm install
+    pip install -r requirements.txt
 
-pip install -r requirements.txt
+    # Create a .env.local file in the project root and paste these values:
+    NEXT_PUBLIC_FIREBASE_API_KEY=ENTER_YOUR_API_KEY_HERE
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=ENTER_YOUR_AUTH_DOMAIN_HERE
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=ENTER_YOUR_PROJECT_ID_HERE
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=ENTER_YOUR_STORAGE_BUCKET_HERE
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=ENTER_YOUR_SENDER_ID_HERE
+    NEXT_PUBLIC_FIREBASE_APP_ID=ENTER_YOUR_APP_ID_HERE
+    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=ENTER_YOUR_MEASUREMENT_ID_HERE
 
-## Setup Environment Variables Create a file named .env.local in the main folder and paste these lines inside it:
-NEXT_PUBLIC_FIREBASE_API_KEY=ENTER_YOUR_API_KEY_HERE
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=ENTER_YOUR_AUTH_DOMAIN_HERE
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=ENTER_YOUR_PROJECT_ID_HERE
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=ENTER_YOUR_STORAGE_BUCKET_HERE
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=ENTER_YOUR_SENDER_ID_HERE
-NEXT_PUBLIC_FIREBASE_APP_ID=ENTER_YOUR_APP_ID_HERE
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=ENTER_YOUR_MEASUREMENT_ID_HERE
+    # Launch the App
+    npm run build
+    npm run dev
 
-## Commands to Launch the App
-npm run build
-
-npm run dev
 
