@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 
-export default function ContactPage() {
+function ContactFormContent() {
     const searchParams = useSearchParams();
     const isDemo = searchParams.get('demo') === 'true';
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -251,5 +251,20 @@ export default function ContactPage() {
                 </Card>
             </div>
         </div>
+    );
+}
+
+export default function ContactPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+                <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-8 w-32 bg-white/10 rounded mb-4"></div>
+                    <div className="h-4 w-48 bg-white/10 rounded"></div>
+                </div>
+            </div>
+        }>
+            <ContactFormContent />
+        </Suspense>
     );
 }
