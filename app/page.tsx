@@ -3,6 +3,32 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+function FadeInSection({ children }: { children: React.ReactNode }) {
+    const [isVisible, setIsVisible] = useState(false);
+    const domRef = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => setIsVisible(entry.isIntersecting));
+        });
+        const currentRef = domRef.current;
+        if (currentRef) observer.observe(currentRef);
+        return () => {
+            if (currentRef) observer.unobserve(currentRef);
+        };
+    }, []);
+
+    return (
+        <div
+            ref={domRef}
+            className={`transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+        >
+            {children}
+        </div>
+    );
+}
+
 export default function LandingPage() {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [mounted, setMounted] = useState(false);
@@ -84,10 +110,10 @@ export default function LandingPage() {
                             backgroundPosition: `${50 + (mousePos.x / (windowWidth || 1) - 0.5) * 100}% center`
                         }}
                     >
-                        Empower Your Teaching with AI
+                        Streamlining the Real Heroes: The Teachers
                     </h1>
                     <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
-                        Streamline collaboration, manage classrooms effortlessly, and unlock your full potential with our intelligent platform.
+                        Putting teachers first. The back-end process of a school made easy. Manage meetings, chat, and coordinate with colleagues effortlessly.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-bold rounded-xl shadow-lg transform transition-all hover:scale-105">
@@ -99,49 +125,70 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                {/* What is LumFlare Section */}
-                <div className="mt-32 max-w-5xl mx-auto w-full">
-                    <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                            What is LumFlare?
-                        </h2>
-                        <div className="grid md:grid-cols-3 gap-8">
-                            <div className="space-y-4">
-                                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-white">Teacher Communication</h3>
-                                <p className="text-gray-400">
-                                    A dedicated Slack-like environment for teachers to chat, create groups, and stay connected with their district.
+                {/* Why Teachers Section */}
+                <FadeInSection>
+                    <div className="mt-20 max-w-5xl mx-auto w-full">
+                        <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10 text-center">
+                            <h2 className="text-3xl md:text-5xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400 pb-2">
+                                Focusing on the Overlooked
+                            </h2>
+                            <div className="space-y-6 text-xl text-gray-300 leading-relaxed">
+                                <p>
+                                    There are countless platforms out there to help make students' lives easier, but we are streamlining who really runs the show: <span className="text-white font-semibold">the teachers</span>.
                                 </p>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-white">School Stream</h3>
-                                <p className="text-gray-400">
-                                    Share updates, events, and success stories with your school or district in a professional, LinkedIn-style feed.
-                                </p>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center text-pink-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-white">Smart Test Calendar</h3>
-                                <p className="text-gray-400">
-                                    Coordinate assessments with colleagues to prevent overload and ensure a balanced schedule for students.
+                                <p>
+                                    We make the entire back-end process of a school easier. Managing meetings, chatting, and coordinating with other teachers has never been easier.
                                 </p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </FadeInSection>
+
+                {/* What is LumFlare Section */}
+                <FadeInSection>
+                    <div className="mt-20 max-w-5xl mx-auto w-full">
+                        <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 pb-2">
+                                What is LumFlare?
+                            </h2>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                <div className="space-y-4">
+                                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-white">Teacher Communication</h3>
+                                    <p className="text-gray-400">
+                                        A dedicated Slack-like environment for teachers to chat, create groups, and stay connected with their district.
+                                    </p>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-white">School Stream</h3>
+                                    <p className="text-gray-400">
+                                        Share updates, events, and success stories with your school or district in a professional, LinkedIn-style feed.
+                                    </p>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center text-pink-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-white">Smart Test Calendar</h3>
+                                    <p className="text-gray-400">
+                                        Coordinate assessments with colleagues to prevent overload and ensure a balanced schedule for students.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </FadeInSection>
             </main>
 
             {/* Footer */}
