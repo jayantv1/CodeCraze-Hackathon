@@ -9,6 +9,16 @@
 
 A social media app designed for teachers within school districts to stay interconnected with each other. Teachers will have the ability to create group chats, individually message other teachers, and create posts on the teacher feed page that appears when teachers initially launch the app. Additionally, this feature provides a smart calendar tool that enables teachers to customize their individual calendars, detects exam overloads, and prompts teachers to coordinate test dates, ensuring students aren't overwhelmed by multiple exams on a single day.
 
+Teachers can:
+
+- 💬 **Create group chats** for subjects, departments, grade levels, or clubs  
+- 🔔 **Message other teachers individually**  
+- 📰 **Post updates to a district-wide teacher feed**  
+- 📅 **Use a smart calendar** that:  
+  - Detects exam overloads  
+  - Helps coordinate test dates  
+  - Prevents students from being overwhelmed by multiple exams in one day  
+
 ### Built With
 
 * React
@@ -29,7 +39,7 @@ How to set up the project and run it locally on your device:
    ```bash
    git clone https://github.com/jayantv1/CodeCraze-Hackathon
 
-##Install Dependencies
+## Commands to Install Dependencies
 npm install
 
 pip install -r requirements.txt
@@ -43,7 +53,7 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=ENTER_YOUR_SENDER_ID_HERE
 NEXT_PUBLIC_FIREBASE_APP_ID=ENTER_YOUR_APP_ID_HERE
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=ENTER_YOUR_MEASUREMENT_ID_HERE
 
-## Launch the App
+## Commands to Launch the App
 npm run build
 
 npm run dev
