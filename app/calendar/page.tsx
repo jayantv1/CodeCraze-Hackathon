@@ -120,10 +120,21 @@ export default function CalendarPage() {
             const dayTests = tests.filter(t => t.date === dateStr);
             if (dayTests.length > 0) {
                 return (
-                    <div className="flex gap-1 justify-center mt-1">
-                        {dayTests.map(t => (
-                            <div key={t.id} className="w-2 h-2 rounded-full bg-red-500" title={t.title}></div>
+                    <div className="flex flex-col gap-1 w-full mt-1 px-1">
+                        {dayTests.slice(0, 3).map(t => (
+                            <div
+                                key={t.id}
+                                className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded truncate w-full text-left font-medium"
+                                title={t.title}
+                            >
+                                {t.title}
+                            </div>
                         ))}
+                        {dayTests.length > 3 && (
+                            <div className="text-[10px] text-gray-400 pl-1">
+                                +{dayTests.length - 3} more
+                            </div>
+                        )}
                     </div>
                 );
             }
@@ -138,16 +149,24 @@ export default function CalendarPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
             <main className="ml-64 flex-1 p-8">
-                <div className="max-w-4xl mx-auto">
-                    <header className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800">Test Calendar</h1>
-                        <p className="text-gray-600">Coordinate assessments to reduce student stress</p>
+                <div className="max-w-6xl mx-auto">
+                    <header className="mb-8 flex justify-between items-end">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Test Calendar</h1>
+                            <p className="text-gray-500 mt-1">Coordinate assessments to reduce student stress</p>
+                        </div>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors"
+                        >
+                            Schedule Test
+                        </button>
                     </header>
 
-                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                         <Calendar
                             onChange={handleDateChange}
                             value={date}
@@ -159,60 +178,93 @@ export default function CalendarPage() {
 
                     {/* Schedule Modal */}
                     {showModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
-                                <h2 className="text-xl font-bold mb-4">Schedule Test</h2>
-                                <p className="text-gray-600 mb-6">Date: {date.toDateString()}</p>
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all scale-100">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-900">Schedule Test</h2>
+                                    <button
+                                        onClick={() => { setShowModal(false); setWarning(null); }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div className="mb-6 flex items-center gap-3 bg-blue-50 p-4 rounded-xl text-blue-900">
+                                    <div className="bg-blue-100 p-2 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-blue-900/60 uppercase tracking-wide">Selected Date</p>
+                                        <p className="font-semibold">{date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                    </div>
+                                </div>
 
                                 {warning && (
-                                    <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
-                                        <strong>⚠️ Conflict Detected</strong>
-                                        <p className="mt-1">{warning}</p>
-                                        <p className="mt-2 text-xs text-yellow-700">Click "Confirm Schedule" again to override.</p>
+                                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-sm flex gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5">
+                                            <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <strong className="block font-semibold text-amber-800 mb-1">Conflict Detected</strong>
+                                            <p>{warning}</p>
+                                            <p className="mt-2 text-xs font-medium text-amber-700">Click "Confirm Schedule" again to override.</p>
+                                        </div>
                                     </div>
                                 )}
 
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Test Title</label>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Test Title</label>
                                         <input
                                             type="text"
                                             required
-                                            className="w-full p-2 border rounded-lg"
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                             value={title}
                                             onChange={(e) => setTitle(e.target.value)}
                                             placeholder="e.g., Unit 3 Exam"
                                         />
                                     </div>
 
-                                    <div className="mb-6">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
-                                        <select
-                                            className="w-full p-2 border rounded-lg"
-                                            value={targetAudience}
-                                            onChange={(e) => {
-                                                setTargetAudience(e.target.value);
-                                                setWarning(null); // Reset warning if audience changes
-                                            }}
-                                        >
-                                            <option>Grade 9</option>
-                                            <option>Grade 10</option>
-                                            <option>Grade 11</option>
-                                            <option>Grade 12</option>
-                                        </select>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Audience</label>
+                                        <div className="relative">
+                                            <select
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white transition-all"
+                                                value={targetAudience}
+                                                onChange={(e) => {
+                                                    setTargetAudience(e.target.value);
+                                                    setWarning(null);
+                                                }}
+                                            >
+                                                <option>Grade 9</option>
+                                                <option>Grade 10</option>
+                                                <option>Grade 11</option>
+                                                <option>Grade 12</option>
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-3">
+                                    <div className="flex justify-end gap-3 mt-8">
                                         <button
                                             type="button"
                                             onClick={() => { setShowModal(false); setWarning(null); }}
-                                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                            className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className={`px-4 py-2 text-white rounded-lg transition-colors ${warning ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                            className={`px-5 py-2.5 text-white rounded-lg font-medium shadow-sm transition-all transform active:scale-95 ${warning ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                                         >
                                             {warning ? 'Confirm Anyway' : 'Schedule Test'}
                                         </button>
