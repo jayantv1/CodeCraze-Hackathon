@@ -29,16 +29,51 @@ def sync_user():
     user_doc = users_ref.document(uid).get()
     
     if not user_doc.exists:
+        # Extract domain and find/create organization
+        domain = email.split('@')[1]
+        orgs_ref = db().collection('organizations')
+        query = orgs_ref.where('domain', '==', domain).limit(1)
+        docs = list(query.stream())
+        
+        if docs:
+            org_id = docs[0].id
+            org_data = docs[0].to_dict()
+            org_name = org_data.get('name', domain.split('.')[0].capitalize())
+        else:
+            # Organization must exist (pre-provisioned)
+            return jsonify({
+                "error": "Organization not found", 
+                "message": f"The domain @{domain} is not registered. Please contact sales to set up your organization."
+            }), 403
+
         users_ref.document(uid).set({
             'uid': uid,
             'email': email,
             'name': name or 'Unknown',
             'role': 'educator',
+            'organizationId': org_id,
+            'organizationName': org_name,
             'createdAt': firestore.SERVER_TIMESTAMP
         })
-        return jsonify({"message": "User created"}), 201
+        return jsonify({"message": "User created", "organizationId": org_id}), 201
     
-    return jsonify({"message": "User already exists"}), 200
+    # If user exists, validate they have an organization
+    user_data = user_doc.to_dict()
+    org_id = user_data.get('organizationId')
+    
+    if not org_id:
+        # Existing user without organization - reject login
+        domain = email.split('@')[1]
+        return jsonify({
+            "error": "Organization not found", 
+            "message": f"The domain @{domain} is not registered. Please contact sales to set up your organization."
+        }), 403
+    
+    return jsonify({
+        "message": "User already exists", 
+        "organizationId": org_id,
+        "organizationName": user_data.get('organizationName')
+    }), 200
 
 # --- GROUPS ---
 @api.route('/api/groups', methods=['GET'])
@@ -47,8 +82,13 @@ def get_groups():
     if not db_instance:
         return jsonify({"error": "Database not connected", "groups": []}), 200
     try:
+        org_id = request.args.get('organizationId')
+        if not org_id:
+            return jsonify({"error": "Organization ID required"}), 400
+
         groups_ref = db_instance.collection('groups')
-        docs = groups_ref.stream()
+        query = groups_ref.where('organizationId', '==', org_id)
+        docs = query.stream()
         groups = [{'id': doc.id, **doc.to_dict()} for doc in docs]
         return jsonify(groups)
     except Exception as e:
@@ -59,14 +99,15 @@ def create_group():
     if not db(): return jsonify({"error": "Database not connected"}), 500
     data = request.json
     # Basic validation
-    if not data.get('name'):
-        return jsonify({"error": "Group name is required"}), 400
+    if not data.get('name') or not data.get('organizationId'):
+        return jsonify({"error": "Group name and organizationId are required"}), 400
     
     update_time, group_ref = db().collection('groups').add({
         'name': data['name'],
         'description': data.get('description', ''),
         'is_private': data.get('is_private', False),
         'created_by': data.get('created_by'), # ID of the educator
+        'organizationId': data['organizationId'],
         'created_at': firestore.SERVER_TIMESTAMP
     })
     return jsonify({"id": group_ref.id, "message": "Group created"}), 201
@@ -80,12 +121,16 @@ def get_posts():
     try:
         # Optional: Filter by scope (school, district, group)
         scope = request.args.get('scope')
+        org_id = request.args.get('organizationId')
+        
+        if not org_id:
+            return jsonify({"error": "Organization ID required"}), 400
         
         posts_ref = db_instance.collection('posts')
+        query = posts_ref.where('organizationId', '==', org_id)
+        
         if scope:
-            query = posts_ref.where('scope', '==', scope)
-        else:
-            query = posts_ref
+            query = query.where('scope', '==', scope)
             
         # Order by created_at desc
         query = query.order_by('created_at', direction=firestore.Query.DESCENDING)
@@ -111,6 +156,7 @@ def create_post():
         'author_id': data['author_id'],
         'author_name': data['author_name'],
         'scope': data['scope'], # 'school', 'district', or group_id
+        'organizationId': data.get('organizationId'),
         'image_url': data.get('image_url'),
         'created_at': firestore.SERVER_TIMESTAMP,
         'likes': 0
@@ -128,12 +174,16 @@ def get_tests():
     try:
         # Filter by grade or date range if needed
         grade = request.args.get('grade')
+        org_id = request.args.get('organizationId')
+        
+        if not org_id:
+            return jsonify({"error": "Organization ID required"}), 400
         
         tests_ref = db_instance.collection('tests')
+        query = tests_ref.where('organizationId', '==', org_id)
+        
         if grade:
-            query = tests_ref.where('target_audience', '==', grade)
-        else:
-            query = tests_ref
+            query = query.where('target_audience', '==', grade)
             
         docs = query.stream()
         tests = [{'id': doc.id, **doc.to_dict()} for doc in docs]
@@ -152,8 +202,12 @@ def check_conflict():
         return jsonify({"error": "Date and target audience required"}), 400
         
     # Query for tests on the same date and audience
+    org_id = data.get('organizationId')
+    if not org_id:
+        return jsonify({"error": "Organization ID required"}), 400
+
     tests_ref = db().collection('tests')
-    query = tests_ref.where('date', '==', date_str).where('target_audience', '==', target_audience)
+    query = tests_ref.where('organizationId', '==', org_id).where('date', '==', date_str).where('target_audience', '==', target_audience)
     docs = list(query.stream())
     
     if len(docs) > 0:
@@ -179,6 +233,7 @@ def schedule_test():
         'date': data['date'], # YYYY-MM-DD
         'target_audience': data['target_audience'],
         'teacher_id': data['teacher_id'],
+        'organizationId': data.get('organizationId'),
         'teacher_name': data.get('teacher_name', 'Unknown'),
         'created_at': firestore.SERVER_TIMESTAMP
     }
@@ -194,12 +249,16 @@ def get_channels():
         return jsonify({"error": "Database not connected", "channels": []}), 200
     try:
         group_id = request.args.get('group_id')
+        org_id = request.args.get('organizationId')
+        
+        if not org_id:
+            return jsonify({"error": "Organization ID required"}), 400
+
         channels_ref = db_instance.collection('channels')
+        query = channels_ref.where('organizationId', '==', org_id)
         
         if group_id:
-            query = channels_ref.where('group_id', '==', group_id)
-        else:
-            query = channels_ref
+            query = query.where('group_id', '==', group_id)
             
         docs = query.stream()
         channels = [{'id': doc.id, **doc.to_dict()} for doc in docs]
@@ -219,6 +278,7 @@ def create_channel():
     channel_data = {
         'name': data['name'],
         'group_id': data['group_id'],
+        'organizationId': data.get('organizationId'),
         'description': data.get('description', ''),
         'is_private': data.get('is_private', False),
         'created_at': firestore.SERVER_TIMESTAMP
@@ -252,6 +312,9 @@ def get_messages():
             query = messages_ref.where('channel_id', '==', channel_id).limit(limit_val)
             docs = list(query.stream())
         
+        # Verify organization access (optional but recommended if channel_id isn't enough)
+        # For now, relying on channel_id being scoped to org via group/channel creation
+        
         messages = [{'id': doc.id, **doc.to_dict()} for doc in docs]
         # Reverse to show oldest first (if we got them in descending order)
         messages.reverse()
@@ -274,6 +337,7 @@ def create_message():
         'author_id': data['author_id'],
         'author_name': data['author_name'],
         'channel_id': data['channel_id'],
+        'organizationId': data.get('organizationId'),
         'is_announcement': data.get('is_announcement', False),
         'created_at': firestore.SERVER_TIMESTAMP
     }
@@ -327,3 +391,93 @@ def get_group_members(group_id):
         return jsonify(members)
     except Exception as e:
         return jsonify({"error": str(e), "members": []}), 500
+
+@api.route('/api/groups/<group_id>', methods=['PATCH'])
+def update_group(group_id):
+    """Update group name and description"""
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    
+    data = request.json
+    name = data.get('name')
+    description = data.get('description', '')
+    
+    if not name:
+        return jsonify({"error": "Group name is required"}), 400
+    
+    try:
+        group_ref = db().collection('groups').document(group_id)
+        group_ref.update({
+            'name': name,
+            'description': description
+        })
+        return jsonify({"message": "Group updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/groups/<group_id>/members', methods=['POST'])
+def add_group_member(group_id):
+    """Add a member to a group"""
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    
+    data = request.json
+    user_id = data.get('user_id')
+    user_name = data.get('user_name')
+    user_email = data.get('user_email')
+    
+    if not user_id or not user_name:
+        return jsonify({"error": "user_id and user_name are required"}), 400
+    
+    try:
+        # Add member to group's members subcollection
+        db().collection('groups').document(group_id).collection('members').document(user_id).set({
+            'user_id': user_id,
+            'user_name': user_name,
+            'user_email': user_email,
+            'role': 'member',
+            'joined_at': firestore.SERVER_TIMESTAMP
+        })
+        return jsonify({"message": "Member added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/groups/<group_id>/members/<user_id>', methods=['DELETE'])
+def remove_group_member(group_id, user_id):
+    """Remove a member from a group"""
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    
+    try:
+        # Delete the member from the group's members subcollection
+        db().collection('groups').document(group_id).collection('members').document(user_id).delete()
+        return jsonify({"message": "Member removed successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/groups/<group_id>', methods=['DELETE'])
+def delete_group(group_id):
+    """Delete a group and all its data"""
+    if not db(): return jsonify({"error": "Database not connected"}), 500
+    
+    try:
+        # Delete all members
+        members_ref = db().collection('groups').document(group_id).collection('members')
+        for member in members_ref.stream():
+            member.reference.delete()
+        
+        # Delete all channels in the group
+        channels_ref = db().collection('channels')
+        channels_query = channels_ref.where('group_id', '==', group_id)
+        for channel in channels_query.stream():
+            # Delete messages in the channel
+            messages_ref = db().collection('messages')
+            messages_query = messages_ref.where('channel_id', '==', channel.id)
+            for message in messages_query.stream():
+                message.reference.delete()
+            # Delete the channel
+            channel.reference.delete()
+        
+        # Delete the group itself
+        db().collection('groups').document(group_id).delete()
+        
+        return jsonify({"message": "Group deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

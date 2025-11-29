@@ -97,7 +97,7 @@ export default function ChannelsList({ groupId, selectedChannelId, onSelectChann
             {/* Create Channel Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
+                    <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700 max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-white mb-4">Create New Channel</h3>
                         <form onSubmit={handleCreateChannel}>
                             <div className="mb-4">
@@ -109,7 +109,7 @@ export default function ChannelsList({ groupId, selectedChannelId, onSelectChann
                                     value={newChannelName}
                                     onChange={(e) => setNewChannelName(e.target.value)}
                                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    placeholder="e.g., general or announcements"
+                                    placeholder="e.g., general-chat"
                                     required
                                 />
                             </div>

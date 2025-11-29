@@ -26,6 +26,7 @@ const Sidebar = () => {
         { href: '/dashboard', label: 'Stream' },
         { href: '/chat', label: 'Messages' },
         { href: '/calendar', label: 'Calendar' },
+        ...(userData?.role === 'admin' ? [{ href: '/admin', label: 'Admin' }] : []),
     ];
 
     return (
@@ -51,6 +52,11 @@ const Sidebar = () => {
                     <p className="font-medium">
                         {loading ? "Loading..." : userData?.name || user?.displayName || user?.email || "Teacher User"}
                     </p>
+                    {userData?.organizationName && (
+                        <p className="text-xs text-gray-500 mt-1 truncate" title={userData.organizationName}>
+                            {userData.organizationName}
+                        </p>
+                    )}
                 </div>
                 <button
                     onClick={handleSignOut}

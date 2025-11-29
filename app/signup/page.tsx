@@ -30,7 +30,7 @@ export default function SignupPage() {
             await updateProfile(user, { displayName: name });
 
             // Sync user with backend
-            await fetch('/api/auth/sync', {
+            const syncRes = await fetch('/api/auth/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -39,6 +39,13 @@ export default function SignupPage() {
                     name: name
                 })
             });
+
+            if (!syncRes.ok) {
+                const errorData = await syncRes.json();
+                // If sync fails (e.g. no org), sign them out immediately
+                await auth.signOut();
+                throw new Error(errorData.message || "Failed to sync user data");
+            }
 
             router.push("/dashboard"); // Redirect to dashboard after signup
         } catch (err: any) {
@@ -58,7 +65,7 @@ export default function SignupPage() {
             const user = result.user;
 
             // Sync user with backend
-            await fetch('/api/auth/sync', {
+            const syncRes = await fetch('/api/auth/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -67,6 +74,12 @@ export default function SignupPage() {
                     name: user.displayName
                 })
             });
+
+            if (!syncRes.ok) {
+                const errorData = await syncRes.json();
+                await auth.signOut();
+                throw new Error(errorData.message || "Failed to sync user data");
+            }
 
             router.push("/dashboard");
         } catch (err: any) {

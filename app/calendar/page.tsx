@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/Sidebar';
+import { useAuth } from '@/context/AuthContext';
 
 interface Test {
     id: string;
@@ -22,13 +23,18 @@ export default function CalendarPage() {
     const [title, setTitle] = useState('');
     const [targetAudience, setTargetAudience] = useState('Grade 10');
 
+    const { userData } = useAuth();
+
     useEffect(() => {
-        fetchTests();
-    }, []);
+        if (userData?.organizationId) {
+            fetchTests();
+        }
+    }, [userData]);
 
     const fetchTests = async () => {
+        if (!userData?.organizationId) return;
         try {
-            const res = await fetch('/api/tests');
+            const res = await fetch(`/api/tests?organizationId=${userData.organizationId}`);
             const data = await res.json();
             if (data.error && data.error.includes('Database not connected')) {
                 console.warn('Firebase not connected. Using empty tests array.');
@@ -55,12 +61,14 @@ export default function CalendarPage() {
     };
 
     const checkConflict = async () => {
+        if (!userData?.organizationId) return { conflict: false };
         const res = await fetch('/api/tests/check-conflict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 date: formatDate(date),
-                target_audience: targetAudience
+                target_audience: targetAudience,
+                organizationId: userData.organizationId
             }),
         });
         return await res.json();
@@ -68,6 +76,7 @@ export default function CalendarPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!userData?.organizationId) return;
 
         // 1. Check for conflicts first if we haven't already accepted a warning
         if (!warning) {
@@ -88,7 +97,8 @@ export default function CalendarPage() {
                     date: formatDate(date),
                     target_audience: targetAudience,
                     teacher_id: 'test-user-id',
-                    teacher_name: 'Teacher User'
+                    teacher_name: 'Teacher User',
+                    organizationId: userData.organizationId
                 }),
             });
 

@@ -5,6 +5,14 @@ import { useGroups } from '../hooks/useGroups';
 import { Group, User } from '@/lib/types';
 import UserSearch from './UserSearch';
 import GroupSettings from './GroupSettings';
+import UserPicker from './UserPicker';
+
+interface OrgUser {
+    uid: string;
+    name: string;
+    email: string;
+    role: string;
+}
 
 interface GroupsListProps {
     selectedGroupId: string | null;
@@ -20,6 +28,7 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
     const [activeGroup, setActiveGroup] = useState<Group | null>(null);
     const [newGroupName, setNewGroupName] = useState('');
     const [newGroupDescription, setNewGroupDescription] = useState('');
+    const [selectedUsers, setSelectedUsers] = useState<OrgUser[]>([]);
 
     const handleCreateGroup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -94,8 +103,8 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
                             <button
                                 onClick={() => onSelectGroup(group)}
                                 className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${selectedGroupId === group.id
-                                        ? 'bg-purple-600 text-white'
-                                        : 'text-gray-300 hover:bg-gray-800'
+                                    ? 'bg-purple-600 text-white'
+                                    : 'text-gray-300 hover:bg-gray-800'
                                     }`}
                             >
                                 <div className="flex items-center space-x-2">
@@ -156,7 +165,7 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
                                     required
                                 />
                             </div>
-                            <div className="mb-6">
+                            <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Description
                                 </label>
@@ -165,13 +174,28 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
                                     onChange={(e) => setNewGroupDescription(e.target.value)}
                                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                                     placeholder="Optional description"
-                                    rows={3}
+                                    rows={2}
                                 />
                             </div>
+
+                            {/* User Picker */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Add Members (Optional)
+                                </label>
+                                <UserPicker
+                                    onSelectUsers={setSelectedUsers}
+                                    selectedUsers={selectedUsers}
+                                />
+                            </div>
+
                             <div className="flex space-x-3">
                                 <button
                                     type="button"
-                                    onClick={() => setShowCreateModal(false)}
+                                    onClick={() => {
+                                        setShowCreateModal(false);
+                                        setSelectedUsers([]);
+                                    }}
                                     className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                                 >
                                     Cancel
@@ -201,8 +225,13 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
                 <GroupSettings
                     groupId={activeGroup.id}
                     groupName={activeGroup.name}
+                    groupDescription={activeGroup.description}
                     isUserAdmin={true} // Mock - get from permissions in production
                     onClose={() => setShowGroupSettings(false)}
+                    onUpdate={() => {
+                        // Refresh groups list when settings are updated
+                        window.location.reload(); // Simple refresh for now
+                    }}
                 />
             )}
         </div>

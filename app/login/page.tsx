@@ -23,11 +23,31 @@ export default function LoginPage() {
 
         try {
             if (!auth) throw new Error("Firebase auth not initialized");
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Sync user with backend to ensure organization assignment
+            const syncRes = await fetch('/api/auth/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    name: user.displayName
+                })
+            });
+
+            if (!syncRes.ok) {
+                const errorData = await syncRes.json();
+                // If sync fails (e.g. no org), sign them out immediately
+                await auth.signOut();
+                throw new Error(errorData.message || "Failed to sync user data");
+            }
+
             router.push("/dashboard"); // Redirect to dashboard after login
         } catch (err: any) {
-            setError("Invalid email or password");
             console.error(err);
+            setError(err.message || "Invalid email or password");
         } finally {
             setLoading(false);
         }
@@ -43,7 +63,7 @@ export default function LoginPage() {
             const user = result.user;
 
             // Sync user with backend
-            await fetch('/api/auth/sync', {
+            const syncRes = await fetch('/api/auth/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -52,6 +72,12 @@ export default function LoginPage() {
                     name: user.displayName
                 })
             });
+
+            if (!syncRes.ok) {
+                const errorData = await syncRes.json();
+                await auth.signOut();
+                throw new Error(errorData.message || "Failed to sync user data");
+            }
 
             router.push("/dashboard");
         } catch (err: any) {

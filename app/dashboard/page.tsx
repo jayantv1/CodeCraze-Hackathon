@@ -17,15 +17,25 @@ export default function Dashboard() {
     const [newPost, setNewPost] = useState('');
     const [scope, setScope] = useState('school');
     const [loading, setLoading] = useState(true);
-    const { user, userData } = useAuth();
+    const { user, userData, loading: authLoading } = useAuth();
 
     useEffect(() => {
-        fetchPosts();
-    }, []);
+        if (authLoading) return;
+
+        if (userData?.organizationId) {
+            fetchPosts();
+        } else {
+            setLoading(false);
+        }
+    }, [userData, authLoading]);
 
     const fetchPosts = async () => {
+        if (!userData?.organizationId) {
+            setLoading(false);
+            return;
+        }
         try {
-            const res = await fetch('/api/posts');
+            const res = await fetch(`/api/posts?organizationId=${userData.organizationId}`);
             const data = await res.json();
             if (data.error && data.error.includes('Database not connected')) {
                 console.warn('Firebase not connected. Using empty posts array.');
@@ -45,7 +55,7 @@ export default function Dashboard() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newPost.trim() || !user) return;
+        if (!newPost.trim() || !user || !userData?.organizationId) return;
 
         try {
             const res = await fetch('/api/posts', {
@@ -55,7 +65,8 @@ export default function Dashboard() {
                     content: newPost,
                     author_id: user.uid,
                     author_name: userData?.name || user.displayName || user.email || 'Unknown User',
-                    scope: scope
+                    scope: scope,
+                    organizationId: userData.organizationId
                 }),
             });
 
@@ -112,6 +123,12 @@ export default function Dashboard() {
                     <div className="space-y-6">
                         {loading ? (
                             <p className="text-center text-gray-500">Loading stream...</p>
+                        ) : !userData?.organizationId ? (
+                            <div className="text-center p-8 bg-white rounded-xl border border-red-200">
+                                <p className="text-red-600 font-medium">No Organization Found</p>
+                                <p className="text-gray-500 mt-2">Your account is not associated with a registered organization.</p>
+                                <p className="text-gray-500 text-sm">Please contact support or your administrator.</p>
+                            </div>
                         ) : posts.length === 0 ? (
                             <p className="text-center text-gray-500">No posts yet. Be the first to share something!</p>
                         ) : (

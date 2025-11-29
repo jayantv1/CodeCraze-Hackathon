@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Message } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext';
 
 export function useChat(channelId: string | null) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { userData } = useAuth();
 
     const fetchMessages = async () => {
         if (!channelId) {
@@ -48,7 +50,7 @@ export function useChat(channelId: string | null) {
     }, [channelId]);
 
     const sendMessage = async (content: string, authorId: string, authorName: string, isAnnouncement: boolean = false) => {
-        if (!channelId || !content.trim()) return;
+        if (!channelId || !content.trim() || !userData?.organizationId) return;
 
         try {
             const response = await fetch('/api/messages', {
@@ -59,7 +61,8 @@ export function useChat(channelId: string | null) {
                     author_id: authorId,
                     author_name: authorName,
                     channel_id: channelId,
-                    is_announcement: isAnnouncement
+                    is_announcement: isAnnouncement,
+                    organizationId: userData.organizationId
                 })
             });
 
