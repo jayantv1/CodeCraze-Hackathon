@@ -7,17 +7,7 @@
 
 ## About The Project
 
-A social media app designed for teachers within school districts to stay interconnected with each other. Teachers will have the ability to create group chats, individually message other teachers, and create posts on the teacher feed page that appears when teachers initially launch the app. Additionally, this feature provides a smart calendar tool that enables teachers to customize their individual calendars, detects exam overloads, and prompts teachers to coordinate test dates, ensuring students aren't overwhelmed by multiple exams on a single day.
-
-Teachers can:
-
-- 💬 **Create group chats** for subjects, departments, grade levels, or clubs  
-- 🔔 **Message other teachers individually**  
-- 📰 **Post updates to a district-wide teacher feed**  
-- 📅 **Use a smart calendar** that:  
-  - Detects exam overloads  
-  - Helps coordinate test dates  
-  - Prevents students from being overwhelmed by multiple exams in one day  
+A social media app designed for teachers within school districts to stay interconnected with each other. Teachers will have the ability to create group chats by subject, department, grade levels, or clubs, individually message other teachers, and create posts on the teacher feed page. Additionally, this feature provides a smart calendar tool that enables teachers to detect exam overloads, and prompts teachers to coordinate test dates, ensuring students aren't overwhelmed by multiple exams on a single day. Our goal is to improve communication, enhance organization, and create a centralized hub for teachers to support one another. 
 
 ### Built With
 
