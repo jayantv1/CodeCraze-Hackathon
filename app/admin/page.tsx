@@ -126,7 +126,7 @@ export default function AdminPage() {
     };
 
     if (loading) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 text-white">Loading...</div>;
     }
 
     if (!user || userData?.role !== 'admin') {
@@ -134,49 +134,49 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
             <Sidebar />
             <main className="ml-64 flex-1 p-8">
                 <div className="max-w-6xl mx-auto">
                     <header className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-                        <p className="text-gray-600">Manage users and organization settings</p>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Admin Dashboard</h1>
+                        <p className="text-gray-300">Manage users and organization settings</p>
                     </header>
 
                     {error && (
-                        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        <div className="mb-4 p-4 bg-red-500/10 border border-red-400/50 text-red-300 rounded-lg">
                             {error}
                         </div>
                     )}
 
                     {success && (
-                        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                        <div className="mb-4 p-4 bg-green-500/10 border border-green-400/50 text-green-300 rounded-lg">
                             {success}
                         </div>
                     )}
 
                     {/* Invite User */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">Invite User</h2>
+                    <div className="bg-white/5 backdrop-blur-lg rounded-xl shadow-sm p-6 mb-8 border border-white/10">
+                        <h2 className="text-xl font-bold text-white mb-4">Invite User</h2>
                         <form onSubmit={handleInviteUser} className="flex gap-4">
                             <input
                                 type="email"
                                 value={inviteEmail}
                                 onChange={(e) => setInviteEmail(e.target.value)}
                                 placeholder="Email address"
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-400"
                             />
                             <select
                                 value={inviteRole}
                                 onChange={(e) => setInviteRole(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white"
                             >
-                                <option value="educator">Educator</option>
-                                <option value="admin">Admin</option>
+                                <option value="educator" className="bg-gray-900">Educator</option>
+                                <option value="admin" className="bg-gray-900">Admin</option>
                             </select>
                             <button
                                 type="submit"
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-lg shadow-purple-500/30"
                             >
                                 Invite
                             </button>
@@ -184,41 +184,41 @@ export default function AdminPage() {
                     </div>
 
                     {/* User List */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800">Organization Users</h2>
+                    <div className="bg-white/5 backdrop-blur-lg rounded-xl shadow-sm border border-white/10 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/10">
+                            <h2 className="text-xl font-bold text-white">Organization Users</h2>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-white/5">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">Email</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">Role</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="divide-y divide-white/10">
                                     {users.map((u) => (
-                                        <tr key={u.uid}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{u.name}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.email}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <tr key={u.uid} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{u.name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{u.email}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                                 <select
                                                     value={u.role}
                                                     onChange={(e) => handleUpdateRole(u.uid, e.target.value)}
-                                                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                                                    className="px-2 py-1 bg-white/10 border border-white/20 rounded text-sm text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                                     disabled={u.uid === user.uid}
                                                 >
-                                                    <option value="educator">Educator</option>
-                                                    <option value="admin">Admin</option>
+                                                    <option value="educator" className="bg-gray-900">Educator</option>
+                                                    <option value="admin" className="bg-gray-900">Admin</option>
                                                 </select>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                                 {u.uid !== user.uid && (
                                                     <button
                                                         onClick={() => handleDeleteUser(u.uid)}
-                                                        className="text-red-600 hover:text-red-900"
+                                                        className="text-red-400 hover:text-red-300 transition-colors"
                                                     >
                                                         Remove
                                                     </button>

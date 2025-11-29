@@ -122,7 +122,7 @@ export default function CalendarPage() {
                 return (
                     <div className="flex gap-1 justify-center mt-1">
                         {dayTests.map(t => (
-                            <div key={t.id} className="w-2 h-2 rounded-full bg-red-500" title={t.title}></div>
+                            <div key={t.id} className="w-2 h-2 rounded-full bg-red-400" title={t.title}></div>
                         ))}
                     </div>
                 );
@@ -138,47 +138,47 @@ export default function CalendarPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
             <Sidebar />
             <main className="ml-64 flex-1 p-8">
                 <div className="max-w-4xl mx-auto">
                     <header className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800">Test Calendar</h1>
-                        <p className="text-gray-600">Coordinate assessments to reduce student stress</p>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Test Calendar</h1>
+                        <p className="text-gray-300">Coordinate assessments to reduce student stress</p>
                     </header>
 
-                    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                    <div className="bg-white/5 backdrop-blur-lg p-8 rounded-xl shadow-sm border border-white/10">
                         <Calendar
                             onChange={handleDateChange}
                             value={date}
                             onClickDay={handleDateClick}
                             tileContent={tileContent}
-                            className="w-full border-none text-gray-800"
+                            className="w-full border-none"
                         />
                     </div>
 
                     {/* Schedule Modal */}
                     {showModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
-                                <h2 className="text-xl font-bold mb-4">Schedule Test</h2>
-                                <p className="text-gray-600 mb-6">Date: {date.toDateString()}</p>
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 max-w-md w-full shadow-2xl border border-white/20">
+                                <h2 className="text-xl font-bold mb-4 text-white">Schedule Test</h2>
+                                <p className="text-gray-300 mb-6">Date: {date.toDateString()}</p>
 
                                 {warning && (
-                                    <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
+                                    <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-400/50 rounded-lg text-yellow-200 text-sm">
                                         <strong>⚠️ Conflict Detected</strong>
                                         <p className="mt-1">{warning}</p>
-                                        <p className="mt-2 text-xs text-yellow-700">Click "Confirm Schedule" again to override.</p>
+                                        <p className="mt-2 text-xs text-yellow-300">Click "Confirm Schedule" again to override.</p>
                                     </div>
                                 )}
 
                                 <form onSubmit={handleSubmit}>
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Test Title</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Test Title</label>
                                         <input
                                             type="text"
                                             required
-                                            className="w-full p-2 border rounded-lg"
+                                            className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none"
                                             value={title}
                                             onChange={(e) => setTitle(e.target.value)}
                                             placeholder="e.g., Unit 3 Exam"
@@ -186,19 +186,19 @@ export default function CalendarPage() {
                                     </div>
 
                                     <div className="mb-6">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Target Audience</label>
                                         <select
-                                            className="w-full p-2 border rounded-lg"
+                                            className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                             value={targetAudience}
                                             onChange={(e) => {
                                                 setTargetAudience(e.target.value);
                                                 setWarning(null); // Reset warning if audience changes
                                             }}
                                         >
-                                            <option>Grade 9</option>
-                                            <option>Grade 10</option>
-                                            <option>Grade 11</option>
-                                            <option>Grade 12</option>
+                                            <option value="Grade 9" className="bg-gray-900">Grade 9</option>
+                                            <option value="Grade 10" className="bg-gray-900">Grade 10</option>
+                                            <option value="Grade 11" className="bg-gray-900">Grade 11</option>
+                                            <option value="Grade 12" className="bg-gray-900">Grade 12</option>
                                         </select>
                                     </div>
 
@@ -206,13 +206,13 @@ export default function CalendarPage() {
                                         <button
                                             type="button"
                                             onClick={() => { setShowModal(false); setWarning(null); }}
-                                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                            className="px-4 py-2 text-gray-300 hover:bg-white/10 rounded-lg transition-colors"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className={`px-4 py-2 text-white rounded-lg transition-colors ${warning ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                            className={`px-4 py-2 text-white rounded-lg transition-all shadow-lg ${warning ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 shadow-yellow-500/30' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-purple-500/30'}`}
                                         >
                                             {warning ? 'Confirm Anyway' : 'Schedule Test'}
                                         </button>

@@ -80,20 +80,20 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
             <Sidebar />
             <main className="ml-64 flex-1 p-8">
                 <div className="max-w-3xl mx-auto">
                     <header className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800">The Stream</h1>
-                        <p className="text-gray-600">Updates from your school and district</p>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">The Stream</h1>
+                        <p className="text-gray-300">Updates from your school and district</p>
                     </header>
 
                     {/* Post Creator */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
+                    <div className="bg-white/5 backdrop-blur-lg rounded-xl shadow-sm p-6 mb-8 border border-white/10">
                         <form onSubmit={handleSubmit}>
                             <textarea
-                                className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                                className="w-full p-4 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none text-white placeholder-gray-400"
                                 placeholder="Share an update, success story, or announcement..."
                                 rows={3}
                                 value={newPost}
@@ -103,15 +103,15 @@ export default function Dashboard() {
                                 <select
                                     value={scope}
                                     onChange={(e) => setScope(e.target.value)}
-                                    className="p-2 border border-gray-200 rounded-lg text-sm text-gray-600"
+                                    className="p-2 bg-white/10 border border-white/20 rounded-lg text-sm text-gray-300 focus:ring-2 focus:ring-purple-500 outline-none"
                                 >
-                                    <option value="school">My School</option>
-                                    <option value="district">My District</option>
-                                    <option value="group">Specific Group</option>
+                                    <option value="school" className="bg-gray-900">My School</option>
+                                    <option value="district" className="bg-gray-900">My District</option>
+                                    <option value="group" className="bg-gray-900">Specific Group</option>
                                 </select>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-lg shadow-purple-500/30"
                                 >
                                     Post Update
                                 </button>
@@ -122,28 +122,28 @@ export default function Dashboard() {
                     {/* Feed */}
                     <div className="space-y-6">
                         {loading ? (
-                            <p className="text-center text-gray-500">Loading stream...</p>
+                            <p className="text-center text-gray-400">Loading stream...</p>
                         ) : !userData?.organizationId ? (
-                            <div className="text-center p-8 bg-white rounded-xl border border-red-200">
-                                <p className="text-red-600 font-medium">No Organization Found</p>
-                                <p className="text-gray-500 mt-2">Your account is not associated with a registered organization.</p>
-                                <p className="text-gray-500 text-sm">Please contact support or your administrator.</p>
+                            <div className="text-center p-8 bg-red-500/10 backdrop-blur-lg rounded-xl border border-red-400/30">
+                                <p className="text-red-300 font-medium">No Organization Found</p>
+                                <p className="text-gray-400 mt-2">Your account is not associated with a registered organization.</p>
+                                <p className="text-gray-400 text-sm">Please contact support or your administrator.</p>
                             </div>
                         ) : posts.length === 0 ? (
-                            <p className="text-center text-gray-500">No posts yet. Be the first to share something!</p>
+                            <p className="text-center text-gray-400">No posts yet. Be the first to share something!</p>
                         ) : (
                             posts.map((post) => (
-                                <div key={post.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                                <div key={post.id} className="bg-white/5 backdrop-blur-lg rounded-xl shadow-sm p-6 border border-white/10">
                                     <div className="flex items-center mb-4">
-                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
                                             {post.author_name[0]}
                                         </div>
                                         <div className="ml-3">
-                                            <h3 className="font-semibold text-gray-900">{post.author_name}</h3>
-                                            <p className="text-xs text-gray-500 uppercase tracking-wide">{post.scope}</p>
+                                            <h3 className="font-semibold text-white">{post.author_name}</h3>
+                                            <p className="text-xs text-purple-300 uppercase tracking-wide">{post.scope}</p>
                                         </div>
                                     </div>
-                                    <p className="text-gray-800 leading-relaxed">{post.content}</p>
+                                    <p className="text-gray-200 leading-relaxed">{post.content}</p>
                                 </div>
                             ))
                         )}
