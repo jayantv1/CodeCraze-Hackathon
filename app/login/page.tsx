@@ -35,9 +35,11 @@ export default function LoginPage() {
         const errorCode = error.code;
         const errorMessage = error.message || '';
 
-        // Check for domain registration errors
-        if (errorMessage.includes('DOMAIN_NOT_REGISTERED:')) {
-            return errorMessage.replace('DOMAIN_NOT_REGISTERED: ', '');
+        // Check for user not found or organization errors
+        if (errorMessage.includes('not have an account') ||
+            errorMessage.includes('not associated with an organization') ||
+            errorMessage.includes('organization no longer exists')) {
+            return errorMessage;
         }
 
         switch (errorCode) {
@@ -83,13 +85,8 @@ export default function LoginPage() {
 
             if (!syncRes.ok) {
                 const errorData = await syncRes.json();
-                // If sync fails (e.g. no org), sign them out immediately
+                // If sync fails, sign them out immediately
                 await auth.signOut();
-
-                // Check if it's a domain registration error
-                if (errorData.message && errorData.message.includes('not registered')) {
-                    throw new Error('DOMAIN_NOT_REGISTERED: ' + errorData.message);
-                }
                 throw new Error(errorData.message || "Failed to sync user data");
             }
 
@@ -125,11 +122,6 @@ export default function LoginPage() {
             if (!syncRes.ok) {
                 const errorData = await syncRes.json();
                 await auth.signOut();
-
-                // Check if it's a domain registration error
-                if (errorData.message && errorData.message.includes('not registered')) {
-                    throw new Error('DOMAIN_NOT_REGISTERED: ' + errorData.message);
-                }
                 throw new Error(errorData.message || "Failed to sync user data");
             }
 
@@ -184,10 +176,11 @@ export default function LoginPage() {
                 {error && (
                     <div className="bg-red-500/10 border border-red-400/50 text-red-300 px-4 py-3 rounded mb-4">
                         <p>{error}</p>
-                        {error.includes('not registered') && (
+                        {(error.includes('not have an account') || error.includes('not associated with')) && (
                             <p className="mt-2 text-sm">
+                                Contact your organization administrator to get invited, or{' '}
                                 <Link href="/signup" className="text-purple-400 hover:text-purple-300 underline">
-                                    Contact us to set up your organization →
+                                    request access here →
                                 </Link>
                             </p>
                         )}
