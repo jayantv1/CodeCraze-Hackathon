@@ -12,6 +12,8 @@ interface Post {
 
 import { useAuth } from '@/context/AuthContext';
 
+import TopBar from '@/components/TopBar';
+
 export default function Dashboard() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [newPost, setNewPost] = useState('');
@@ -82,8 +84,9 @@ export default function Dashboard() {
     return (
         <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
             <Sidebar />
-            <main className="ml-64 flex-1 p-8">
-                <div className="max-w-3xl mx-auto">
+            <main className="ml-64 flex-1 p-8 relative">
+                <TopBar />
+                <div className="max-w-3xl mx-auto pt-8">
                     <header className="mb-8">
                         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">The Stream</h1>
                         <p className="text-gray-300">Updates from your school and district</p>
