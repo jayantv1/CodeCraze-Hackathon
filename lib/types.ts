@@ -7,6 +7,11 @@ export interface User {
     domain: string;
     organization_id: string;
     avatar_url?: string;
+    photoURL?: string;
+    position?: string;
+    location?: string;
+    displayName?: string;
+    pronouns?: string;
     role: 'admin' | 'user';
     created_at: Timestamp | Date;
 }

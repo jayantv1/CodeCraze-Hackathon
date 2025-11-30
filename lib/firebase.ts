@@ -1,6 +1,7 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Check if we have the required Firebase config
 const hasFirebaseConfig =
@@ -21,12 +22,14 @@ const firebaseConfig = hasFirebaseConfig ? {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
 
 if (firebaseConfig) {
     try {
         app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
         auth = getAuth(app);
         db = getFirestore(app);
+        storage = getStorage(app);
     } catch (error) {
         console.error('Firebase initialization error:', error);
     }
@@ -34,4 +37,4 @@ if (firebaseConfig) {
     console.warn('Firebase configuration missing. Please set NEXT_PUBLIC_FIREBASE_* environment variables.');
 }
 
-export { app, auth, db };
+export { app, auth, db, storage };
