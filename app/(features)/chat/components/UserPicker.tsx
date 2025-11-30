@@ -50,10 +50,12 @@ export default function UserPicker({ onSelectUsers, selectedUsers }: UserPickerP
         }
     };
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = users
+        .filter(user => user.uid !== userData?.uid) // Don't show current user
+        .filter(user =>
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
     if (loading) {
         return <div className="text-gray-400 text-sm">Loading users...</div>;
@@ -77,8 +79,8 @@ export default function UserPicker({ onSelectUsers, selectedUsers }: UserPickerP
                             key={user.uid}
                             onClick={() => toggleUser(user)}
                             className={`p-3 rounded-lg cursor-pointer transition-colors ${isSelected
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
                                 }`}
                         >
                             <div className="flex items-center justify-between">
