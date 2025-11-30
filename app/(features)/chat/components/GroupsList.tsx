@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { useGroups } from '../hooks/useGroups';
+import { usePermissions } from '../hooks/usePermissions';
 import { Group, User } from '@/lib/types';
 import UserSearch from './UserSearch';
 import GroupSettings from './GroupSettings';
 import UserPicker from './UserPicker';
+import { useAuth } from '@/context/AuthContext';
 
 interface OrgUser {
     uid: string;
@@ -22,6 +24,7 @@ interface GroupsListProps {
 
 export default function GroupsList({ selectedGroupId, onSelectGroup, currentUserId }: GroupsListProps) {
     const { groups, loading, error, createGroup, joinGroup } = useGroups();
+    const { userData } = useAuth();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showUserSearch, setShowUserSearch] = useState(false);
     const [showGroupSettings, setShowGroupSettings] = useState(false);
@@ -34,9 +37,10 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
         e.preventDefault();
         if (newGroupName.trim()) {
             try {
-                await createGroup(newGroupName, newGroupDescription, false);
+                await createGroup(newGroupName, newGroupDescription, false, selectedUsers);
                 setNewGroupName('');
                 setNewGroupDescription('');
+                setSelectedUsers([]);
                 setShowCreateModal(false);
             } catch (err) {
                 console.error('Failed to create group:', err);
@@ -63,9 +67,6 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
         setActiveGroup(group);
         setShowUserSearch(true);
     };
-
-    // Mock - in production, get user's domain from auth
-    const currentUserDomain = 'example.com';
 
     return (
         <div className="w-64 bg-gray-900 border-r border-gray-700 flex flex-col h-full">
@@ -212,28 +213,42 @@ export default function GroupsList({ selectedGroupId, onSelectGroup, currentUser
                 </div>
             )}
 
-            {showUserSearch && activeGroup && (
+            {showUserSearch && activeGroup && userData?.organizationId && (
                 <UserSearch
                     groupId={activeGroup.id}
-                    currentDomain={currentUserDomain}
+                    organizationId={userData.organizationId}
                     onAddUser={handleAddUser}
                     onClose={() => setShowUserSearch(false)}
                 />
             )}
 
             {showGroupSettings && activeGroup && (
-                <GroupSettings
-                    groupId={activeGroup.id}
-                    groupName={activeGroup.name}
-                    groupDescription={activeGroup.description}
-                    isUserAdmin={true} // Mock - get from permissions in production
+                <GroupSettingsWrapper
+                    group={activeGroup}
                     onClose={() => setShowGroupSettings(false)}
                     onUpdate={() => {
-                        // Refresh groups list when settings are updated
-                        window.location.reload(); // Simple refresh for now
+                        window.location.reload();
                     }}
+                    currentUserId={currentUserId}
                 />
             )}
         </div>
+    );
+}
+
+function GroupSettingsWrapper({ group, onClose, onUpdate, currentUserId }: { group: Group, onClose: () => void, onUpdate: () => void, currentUserId: string }) {
+    const { isAdmin, loading } = usePermissions(group.id, currentUserId, group.created_by);
+
+    if (loading) return null;
+
+    return (
+        <GroupSettings
+            groupId={group.id}
+            groupName={group.name}
+            groupDescription={group.description}
+            isUserAdmin={isAdmin}
+            onClose={onClose}
+            onUpdate={onUpdate}
+        />
     );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { GroupMember, MemberPermissions } from '@/lib/types';
 
-export function usePermissions(groupId: string | null, userId: string) {
+export function usePermissions(groupId: string | null, userId: string, groupCreatorId?: string) {
     const [permissions, setPermissions] = useState<GroupMember | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -18,12 +18,16 @@ export function usePermissions(groupId: string | null, userId: string) {
         const fetchPermissions = async () => {
             setLoading(true);
             try {
+                console.log(`[usePermissions] Fetching permissions for group ${groupId}, user ${userId}`);
                 const response = await fetch(`/api/groups/${groupId}/members`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch members');
                 }
                 const members: GroupMember[] = await response.json();
+                console.log(`[usePermissions] Found ${members.length} members:`, members);
                 const userMember = members.find(m => m.user_id === userId);
+                console.log(`[usePermissions] Current user member:`, userMember);
+                console.log(`[usePermissions] Is admin?`, userMember?.role === 'admin' || userMember?.role === 'owner' || userId === groupCreatorId);
                 setPermissions(userMember || null);
                 setLoading(false);
             } catch (err: any) {
@@ -41,7 +45,8 @@ export function usePermissions(groupId: string | null, userId: string) {
     const canAnnounce = permissions?.permissions?.can_announce ?? false;
     const canInvite = permissions?.permissions?.can_invite ?? false;
     const canManageChannels = permissions?.permissions?.can_manage_channels ?? false;
-    const isAdmin = permissions?.role === 'admin' || permissions?.role === 'owner';
+    const isCreator = userId === groupCreatorId;
+    const isAdmin = permissions?.role === 'admin' || permissions?.role === 'owner' || isCreator;
     const isModerator = permissions?.role === 'moderator' || isAdmin;
 
     const updateMemberPermissions = async (updatedPermissions: Partial<MemberPermissions>) => {

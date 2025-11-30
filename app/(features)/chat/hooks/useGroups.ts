@@ -15,7 +15,9 @@ export function useGroups() {
         try {
             const response = await fetch(`/api/groups?organizationId=${userData.organizationId}`);
             if (!response.ok) {
-                throw new Error('Failed to fetch groups');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Group fetch failed:', errorData);
+                throw new Error(errorData.details || 'Failed to fetch groups');
             }
             const data = await response.json();
             setGroups(data);
@@ -36,8 +38,15 @@ export function useGroups() {
         }
     }, [userData]);
 
-    const createGroup = async (name: string, description: string, isPrivate: boolean = false) => {
-        if (!userData?.organizationId) return;
+    const createGroup = async (name: string, description: string, isPrivate: boolean = false, selectedUsers: Array<{ uid: string, name: string, email: string }> = []) => {
+        console.log('createGroup called with:', { name, description, isPrivate, selectedUsers });
+        console.log('Current userData:', userData);
+        console.log('userData.uid:', userData?.uid);
+
+        if (!userData?.organizationId || !userData?.uid) {
+            console.error('Missing organizationId or uid in userData');
+            return;
+        }
         try {
             const response = await fetch('/api/groups', {
                 method: 'POST',
@@ -46,7 +55,10 @@ export function useGroups() {
                     name,
                     description,
                     is_private: isPrivate,
-                    organizationId: userData.organizationId
+                    organizationId: userData.organizationId,
+                    creatorId: userData.uid,
+                    creatorName: userData.name || 'Unknown User',
+                    selectedUsers  // Pass selected users to API
                 })
             });
             const data = await response.json();

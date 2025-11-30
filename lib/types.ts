@@ -51,6 +51,7 @@ export interface Group {
     description: string;
     is_private: boolean;
     created_at: Timestamp | Date;
+    created_by: string;
 }
 
 export interface Channel {

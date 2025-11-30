@@ -10,6 +10,7 @@ interface MessageProps {
 
 export default function Message({ message, isCurrentUser = false }: MessageProps) {
     const getInitials = (name: string) => {
+        if (!name) return '?';
         return name
             .split(' ')
             .map(n => n[0])
@@ -27,16 +28,16 @@ export default function Message({ message, isCurrentUser = false }: MessageProps
     return (
         <div className={`group flex items-start space-x-4 ${message.is_announcement ? 'bg-purple-900/20 -mx-6 px-6 py-4 border-l-4 border-purple-500' : ''}`}>
             <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-white font-bold shadow-lg ${message.is_announcement
-                    ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
-                    : 'bg-gradient-to-br from-purple-500 to-blue-500'
+                ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
+                : 'bg-gradient-to-br from-purple-500 to-blue-500'
                 }`}>
                 {getInitials(message.author_name)}
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-baseline space-x-2">
-                    <span className={`font-bold hover:underline cursor-pointer ${message.is_announcement ? 'text-yellow-400' : 'text-white'
+                    <span className={`font-bold hover:underline cursor-pointer truncate max-w-[200px] ${message.is_announcement ? 'text-yellow-400' : 'text-white'
                         }`}>
-                        {message.author_name}
+                        {message.author_name || 'Unknown User'}
                     </span>
                     {message.is_announcement && (
                         <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">

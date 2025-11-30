@@ -8,14 +8,14 @@ export function useUsers() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const searchUsers = async (query: string, domain?: string) => {
+    const searchUsers = async (query: string, organizationId?: string) => {
         setLoading(true);
         setError(null);
 
         try {
             const params = new URLSearchParams();
             if (query) params.append('query', query);
-            if (domain) params.append('domain', domain);
+            if (organizationId) params.append('organizationId', organizationId);
 
             const response = await fetch(`/api/users/search?${params.toString()}`);
             if (!response.ok) {

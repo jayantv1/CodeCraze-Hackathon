@@ -331,21 +331,52 @@ export default function GroupSettings({
                                                     {member.user_name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-medium text-white">{member.user_name}</div>
+                                                    <div className="font-medium text-white">
+                                                        {member.user_name}
+                                                        {userData?.uid === member.user_id && <span className="text-gray-400 text-xs ml-2">(You)</span>}
+                                                    </div>
                                                     <div className="text-sm text-gray-400">{member.user_email}</div>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center space-x-3">
-                                                <span className="px-3 py-1 bg-gray-600 text-gray-200 rounded-lg text-sm">
-                                                    {member.role}
-                                                </span>
-                                                <button
-                                                    onClick={() => removeMember(member.user_id)}
-                                                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
-                                                >
-                                                    Remove
-                                                </button>
+                                                {isUserAdmin && userData?.uid !== member.user_id ? (
+                                                    <select
+                                                        value={member.role}
+                                                        onChange={async (e) => {
+                                                            const newRole = e.target.value;
+                                                            try {
+                                                                await fetch(`/api/groups/${groupId}/members/${member.user_id}`, {
+                                                                    method: 'PUT',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ role: newRole })
+                                                                });
+                                                                fetchMembers();
+                                                            } catch (err) {
+                                                                console.error('Error updating role:', err);
+                                                                alert('Failed to update role');
+                                                            }
+                                                        }}
+                                                        className="bg-gray-600 text-white text-sm rounded-lg px-2 py-1 border border-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                    >
+                                                        <option value="member">Member</option>
+                                                        <option value="moderator">Moderator</option>
+                                                        <option value="admin">Admin</option>
+                                                    </select>
+                                                ) : (
+                                                    <span className="px-3 py-1 bg-gray-600 text-gray-200 rounded-lg text-sm capitalize">
+                                                        {member.role}
+                                                    </span>
+                                                )}
+
+                                                {isUserAdmin && userData?.uid !== member.user_id && (
+                                                    <button
+                                                        onClick={() => removeMember(member.user_id)}
+                                                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

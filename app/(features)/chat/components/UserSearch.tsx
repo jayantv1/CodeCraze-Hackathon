@@ -8,11 +8,11 @@ import UserCard from './UserCard';
 interface UserSearchProps {
     onClose: () => void;
     onAddUser: (user: User) => void;
-    currentDomain: string;
+    organizationId: string;
     groupId: string;
 }
 
-export default function UserSearch({ onClose, onAddUser, currentDomain, groupId }: UserSearchProps) {
+export default function UserSearch({ onClose, onAddUser, organizationId, groupId }: UserSearchProps) {
     const { users, loading, searchUsers } = useUsers();
     const [query, setQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -27,10 +27,10 @@ export default function UserSearch({ onClose, onAddUser, currentDomain, groupId 
 
     // Search when debounced query changes
     useEffect(() => {
-        if (debouncedQuery || currentDomain) {
-            searchUsers(debouncedQuery, currentDomain);
+        if (organizationId) {
+            searchUsers(debouncedQuery, organizationId);
         }
-    }, [debouncedQuery, currentDomain]);
+    }, [debouncedQuery, organizationId]);
 
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
@@ -61,12 +61,6 @@ export default function UserSearch({ onClose, onAddUser, currentDomain, groupId 
                             🔍
                         </span>
                     </div>
-
-                    {currentDomain && (
-                        <p className="text-sm text-gray-400 mt-2">
-                            Showing users from <span className="text-purple-400">@{currentDomain}</span>
-                        </p>
-                    )}
                 </div>
 
                 {/* Results */}

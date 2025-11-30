@@ -2,19 +2,26 @@
 
 import React, { useState } from 'react';
 import { useChannels } from '../hooks/useChannels';
+import { usePermissions } from '../hooks/usePermissions';
 import { Channel } from '@/lib/types';
+import ChannelSettings from './ChannelSettings';
 
 interface ChannelsListProps {
     groupId: string | null;
     selectedChannelId: string | null;
     onSelectChannel: (channel: Channel) => void;
+    currentUserId: string;
 }
 
-export default function ChannelsList({ groupId, selectedChannelId, onSelectChannel }: ChannelsListProps) {
+export default function ChannelsList({ groupId, selectedChannelId, onSelectChannel, currentUserId }: ChannelsListProps) {
     const { channels, loading, error, createChannel } = useChannels(groupId);
+    const { isAdmin } = usePermissions(groupId, currentUserId);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newChannelName, setNewChannelName] = useState('');
     const [newChannelDescription, setNewChannelDescription] = useState('');
+
+    // Settings state
+    const [editingChannel, setEditingChannel] = useState<Channel | null>(null);
 
     const handleCreateChannel = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,13 +54,15 @@ export default function ChannelsList({ groupId, selectedChannelId, onSelectChann
             <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-white">Channels</h2>
-                    <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="w-8 h-8 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors"
-                        title="Create Channel"
-                    >
-                        +
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="w-8 h-8 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors"
+                            title="Create Channel"
+                        >
+                            +
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -68,28 +77,42 @@ export default function ChannelsList({ groupId, selectedChannelId, onSelectChann
                 {!loading && !error && channels.length === 0 && (
                     <div className="p-4 text-gray-400 text-sm text-center">
                         <p className="mb-2">No channels yet</p>
-                        <p className="text-xs">Click + to create one!</p>
+                        {isAdmin && <p className="text-xs">Click + to create one!</p>}
                     </div>
                 )}
                 <div className="p-2 space-y-1">
                     {channels.map((channel) => (
-                        <button
-                            key={channel.id}
-                            onClick={() => onSelectChannel(channel)}
-                            className={`w-full text-left px-3 py-2 rounded-lg transition-colors group ${selectedChannelId === channel.id
-                                ? 'bg-purple-600 text-white'
-                                : 'text-gray-300 hover:bg-gray-800'
-                                }`}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <span className="text-gray-400 group-hover:text-gray-300">
-                                    {channel.is_private ? '🔒' : '#'}
-                                </span>
-                                <div className="flex-1 min-w-0">
-                                    <div className="font-medium truncate">{channel.name}</div>
+                        <div key={channel.id} className="relative group">
+                            <button
+                                onClick={() => onSelectChannel(channel)}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedChannelId === channel.id
+                                    ? 'bg-purple-600 text-white'
+                                    : 'text-gray-300 hover:bg-gray-800'
+                                    }`}
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-gray-400 group-hover:text-gray-300">
+                                        {channel.is_private ? '🔒' : '#'}
+                                    </span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-medium truncate">{channel.name}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+
+                            {isAdmin && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingChannel(channel);
+                                    }}
+                                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-all"
+                                    title="Settings"
+                                >
+                                    ⚙️
+                                </button>
+                            )}
+                        </div>
                     ))}
                 </div>
             </div>
@@ -143,6 +166,20 @@ export default function ChannelsList({ groupId, selectedChannelId, onSelectChann
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Channel Settings Modal */}
+            {editingChannel && (
+                <ChannelSettings
+                    channelId={editingChannel.id}
+                    channelName={editingChannel.name}
+                    channelDescription={editingChannel.description}
+                    isUserAdmin={isAdmin}
+                    onClose={() => setEditingChannel(null)}
+                    onUpdate={() => {
+                        window.location.reload();
+                    }}
+                />
             )}
         </div>
     );

@@ -111,8 +111,15 @@ def add_user(email, name=None, role="educator"):
             "createdAt": gcs_firestore.SERVER_TIMESTAMP,
         }
 
-        db.collection("users").document(user_uid).set(user_data, merge=True)
-        print(f"✅ Created/Updated Firestore user document\n")
+        # Create root pointer
+        db.collection("users").document(user_uid).set({
+            "uid": user_uid,
+            "organizationId": org_id
+        }, merge=True)
+
+        # Create user in organization collection
+        db.collection("organizations").document(org_id).collection("users").document(user_uid).set(user_data, merge=True)
+        print(f"✅ Created/Updated Firestore user document in organization\n")
 
         print("=" * 60)
         print("✅ FIRST ADMIN ACCOUNT CREATED!")
