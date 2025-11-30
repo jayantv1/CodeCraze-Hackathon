@@ -155,10 +155,18 @@ def get_posts():
         if scope:
             query = query.where("scope", "==", scope)
 
-        # Order by created_at desc
-        query = query.order_by("created_at", direction=firestore.Query.DESCENDING)
+        try:
+            # Order by created_at desc
+            query = query.order_by("created_at", direction=firestore.Query.DESCENDING)
+            docs = list(query.stream())
+        except Exception as index_error:
+            print(f"Falling back to simple query: {index_error}")
+            # Re-create base query without ordering
+            query = posts_ref.where("organizationId", "==", org_id)
+            if scope:
+                query = query.where("scope", "==", scope)
+            docs = list(query.stream())
 
-        docs = query.stream()
         posts = [{"id": doc.id, **doc.to_dict()} for doc in docs]
         return jsonify(posts)
     except Exception as e:
