@@ -78,5 +78,53 @@ export function useChat(channelId: string | null) {
         }
     };
 
-    return { messages, loading, error, sendMessage };
+    const deleteMessage = async (messageId: string, authorId: string) => {
+        try {
+            const response = await fetch(`/api/messages/${messageId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author_id: authorId })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete message');
+            }
+
+            // Refresh messages immediately after deletion
+            await fetchMessages();
+        } catch (err: any) {
+            console.error('Error deleting message:', err);
+            throw err;
+        }
+    };
+
+    const deleteMultipleMessages = async (messageIds: string[], authorId: string) => {
+        try {
+            // Delete all messages in parallel
+            const deletePromises = messageIds.map(messageId =>
+                fetch(`/api/messages/${messageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ author_id: authorId })
+                })
+            );
+
+            const responses = await Promise.all(deletePromises);
+
+            // Check if any failed
+            const failures = responses.filter(r => !r.ok);
+            if (failures.length > 0) {
+                throw new Error(`Failed to delete ${failures.length} message(s)`);
+            }
+
+            // Refresh messages immediately after deletion
+            await fetchMessages();
+        } catch (err: any) {
+            console.error('Error deleting messages:', err);
+            throw err;
+        }
+    };
+
+    return { messages, loading, error, sendMessage, deleteMessage, deleteMultipleMessages };
 }

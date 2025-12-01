@@ -14,9 +14,13 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ channel, currentUserId, currentUserName }: ChatWindowProps) {
-    const { messages, loading, error, sendMessage } = useChat(channel?.id || null);
+    const { messages, loading, error, sendMessage, deleteMessage, deleteMultipleMessages } = useChat(channel?.id || null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [showPins, setShowPins] = useState(false);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+    const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,6 +58,40 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
         }
     };
 
+    const toggleSelectionMode = () => {
+        setSelectionMode(!selectionMode);
+        setSelectedMessageIds(new Set()); // Clear selections when toggling mode
+    };
+
+    const handleToggleMessageSelection = (messageId: string) => {
+        setSelectedMessageIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(messageId)) {
+                newSet.delete(messageId);
+            } else {
+                newSet.add(messageId);
+            }
+            return newSet;
+        });
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedMessageIds.size === 0 || !currentUserId) return;
+
+        setIsBulkDeleting(true);
+        try {
+            await deleteMultipleMessages(Array.from(selectedMessageIds), currentUserId);
+            setShowBulkDeleteConfirm(false);
+            setSelectionMode(false);
+            setSelectedMessageIds(new Set());
+        } catch (error) {
+            console.error('Failed to delete messages:', error);
+            alert('Failed to delete some messages. Please try again.');
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    };
+
     if (!channel) {
         return (
             <div className="flex-1 flex items-center justify-center bg-gray-800">
@@ -82,13 +120,28 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
                     </h2>
                     <p className="text-xs text-gray-400">{channel.description || 'No description'}</p>
                 </div>
-                <button
-                    onClick={() => setShowPins(!showPins)}
-                    className={`p-2 rounded-lg transition-colors ${showPins ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
-                    title="Pinned Messages"
-                >
-                    📌
-                </button>
+                <div className="flex items-center space-x-2">
+                    {!selectionMode && (
+                        <>
+                            <button
+                                onClick={toggleSelectionMode}
+                                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                                title="Select messages"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => setShowPins(!showPins)}
+                                className={`p-2 rounded-lg transition-colors ${showPins ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
+                                title="Pinned Messages"
+                            >
+                                📌
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
 
             {showPins && (
@@ -130,11 +183,72 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
                             message={msg}
                             isCurrentUser={msg.author_id === currentUserId}
                             isGroupStart={isGroupStart}
+                            currentUserId={currentUserId}
+                            onDelete={deleteMessage}
+                            selectionMode={selectionMode}
+                            isSelected={selectedMessageIds.has(msg.id)}
+                            onToggleSelect={() => handleToggleMessageSelection(msg.id)}
                         />
                     );
                 })}
                 <div ref={messagesEndRef} />
             </div>
+
+            {/* Selection Mode Action Bar */}
+            {selectionMode && (
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3 flex items-center space-x-4 z-20">
+                    <span className="text-white font-medium">
+                        {selectedMessageIds.size} selected
+                    </span>
+                    <div className="flex items-center space-x-2">
+                        {selectedMessageIds.size > 0 && (
+                            <button
+                                onClick={() => setShowBulkDeleteConfirm(true)}
+                                className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors"
+                                title="Delete selected"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </button>
+                        )}
+                        <button
+                            onClick={toggleSelectionMode}
+                            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Delete Confirmation Modal */}
+            {showBulkDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowBulkDeleteConfirm(false)}>
+                    <div className="bg-gray-800 rounded-lg p-6 max-w-sm mx-4 border border-gray-700" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-white mb-2">Delete Messages</h3>
+                        <p className="text-gray-300 mb-4">
+                            Are you sure you want to delete {selectedMessageIds.size} message{selectedMessageIds.size > 1 ? 's' : ''}? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowBulkDeleteConfirm(false)}
+                                disabled={isBulkDeleting}
+                                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleBulkDelete}
+                                disabled={isBulkDeleting}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                {isBulkDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Input Area */}
             <InputBox

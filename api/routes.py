@@ -380,6 +380,9 @@ def get_messages():
 
         messages = [{"id": doc.id, **doc.to_dict()} for doc in docs]
         
+        # Filter out deleted messages
+        messages = [msg for msg in messages if not msg.get('deleted', False)]
+        
         # Ensure messages are sorted by created_at (oldest first)
         # This handles both the sorted DB query (which returns newest first, so we reverse)
         # and the fallback query (which might return in any order)
@@ -413,6 +416,40 @@ def create_message():
 
     update_time, message_ref = db().collection("messages").add(message_data)
     return jsonify({"id": message_ref.id, "message": "Message sent"}), 201
+
+
+@api.route("/api/messages/<message_id>", methods=["DELETE"])
+def delete_message(message_id):
+    if not db():
+        return jsonify({"error": "Database not connected"}), 500
+    
+    data = request.json
+    author_id = data.get("author_id")
+    
+    if not author_id:
+        return jsonify({"error": "author_id is required"}), 400
+    
+    try:
+        # Get the message to verify ownership
+        message_ref = db().collection("messages").document(message_id)
+        message_doc = message_ref.get()
+        
+        if not message_doc.exists:
+            return jsonify({"error": "Message not found"}), 404
+        
+        message_data = message_doc.to_dict()
+        
+        # Verify that the requesting user is the author
+        if message_data.get("author_id") != author_id:
+            return jsonify({"error": "Unauthorized: You can only delete your own messages"}), 403
+        
+        # Soft delete: mark the message as deleted
+        message_ref.update({"deleted": True})
+        
+        return jsonify({"message": "Message deleted successfully"}), 200
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # --- GROUP MEMBERS ---

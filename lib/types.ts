@@ -76,5 +76,6 @@ export interface Message {
     author_name: string;
     channel_id: string;
     is_announcement: boolean;
+    deleted?: boolean;
     created_at: Timestamp | Date;
 }
