@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import MentionList from './MentionList';
 
 interface InputBoxProps {
     onSendMessage: (content: string, isAnnouncement: boolean) => void;
@@ -28,8 +29,96 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
         }
     };
 
+    const [showMentions, setShowMentions] = useState(false);
+    const [mentionQuery, setMentionQuery] = useState('');
+    const [cursorPosition, setCursorPosition] = useState(0);
+
+    const handleFormat = (format: 'bold' | 'italic' | 'strike') => {
+        const textarea = document.querySelector('textarea');
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = message.substring(start, end);
+
+        let formattedText = '';
+        let prefix = '';
+        let suffix = '';
+
+        switch (format) {
+            case 'bold':
+                prefix = '**';
+                suffix = '**';
+                break;
+            case 'italic':
+                prefix = '*';
+                suffix = '*';
+                break;
+            case 'strike':
+                prefix = '~~';
+                suffix = '~~';
+                break;
+        }
+
+        formattedText = prefix + selectedText + suffix;
+        const newMessage = message.substring(0, start) + formattedText + message.substring(end);
+
+        setMessage(newMessage);
+
+        // Restore focus and selection
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+        }, 0);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = e.target.value;
+        const newCursorPosition = e.target.selectionStart;
+        setMessage(newValue);
+        setCursorPosition(newCursorPosition);
+
+        // Check for mention trigger
+        const lastAt = newValue.lastIndexOf('@', newCursorPosition - 1);
+        if (lastAt !== -1) {
+            const textAfterAt = newValue.substring(lastAt + 1, newCursorPosition);
+            if (!textAfterAt.includes(' ')) {
+                setShowMentions(true);
+                setMentionQuery(textAfterAt);
+                return;
+            }
+        }
+        setShowMentions(false);
+    };
+
+    const handleSelectUser = (user: any) => {
+        const lastAt = message.lastIndexOf('@', cursorPosition - 1);
+        if (lastAt !== -1) {
+            const newMessage = message.substring(0, lastAt) + `@${user.name} ` + message.substring(cursorPosition);
+            setMessage(newMessage);
+            setShowMentions(false);
+
+            // Focus back on textarea
+            const textarea = document.querySelector('textarea');
+            if (textarea) {
+                setTimeout(() => {
+                    textarea.focus();
+                    const newPos = lastAt + user.name.length + 2; // @ + name + space
+                    textarea.setSelectionRange(newPos, newPos);
+                }, 0);
+            }
+        }
+    };
+
     return (
-        <div className="p-6 bg-gray-900/50 backdrop-blur-sm">
+        <div className="p-6 bg-gray-900/50 backdrop-blur-sm relative">
+            {showMentions && (
+                <MentionList
+                    query={mentionQuery}
+                    onSelect={handleSelectUser}
+                    onClose={() => setShowMentions(false)}
+                />
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="bg-gray-700/50 border border-gray-600 rounded-xl p-2 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all shadow-lg">
                     {/* Toolbar */}
@@ -37,6 +126,7 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
                         <div className="flex items-center space-x-2">
                             <button
                                 type="button"
+                                onClick={() => handleFormat('bold')}
                                 className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors"
                                 title="Bold"
                             >
@@ -44,6 +134,7 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
                             </button>
                             <button
                                 type="button"
+                                onClick={() => handleFormat('italic')}
                                 className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors"
                                 title="Italic"
                             >
@@ -51,6 +142,7 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
                             </button>
                             <button
                                 type="button"
+                                onClick={() => handleFormat('strike')}
                                 className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors"
                                 title="Strikethrough"
                             >
@@ -70,7 +162,7 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
 
                     <textarea
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         disabled={disabled}
                         className="w-full bg-transparent text-white placeholder-gray-400 px-3 py-2 outline-none resize-none h-20"
@@ -88,6 +180,16 @@ export default function InputBox({ onSendMessage, channelName = 'channel', disab
                             </button>
                             <button
                                 type="button"
+                                onClick={() => {
+                                    setMessage(prev => prev + '@');
+                                    setShowMentions(true);
+                                    setMentionQuery('');
+                                    // Focus and set cursor
+                                    const textarea = document.querySelector('textarea');
+                                    if (textarea) {
+                                        textarea.focus();
+                                    }
+                                }}
                                 className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded-full transition-colors"
                                 title="Mention someone"
                             >

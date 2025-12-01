@@ -352,24 +352,39 @@ def get_messages():
 
         try:
             # Try to query with ordering (requires index)
+            query = messages_ref.where("channel_id", "==", channel_id)
+
+            # Filter by announcement if requested
+            is_announcement = request.args.get("is_announcement")
+            if is_announcement == "true":
+                query = query.where("is_announcement", "==", True)
+
             query = (
-                messages_ref.where("channel_id", "==", channel_id)
-                .order_by("created_at", direction=firestore.Query.DESCENDING)
+                query.order_by("created_at", direction=firestore.Query.DESCENDING)
                 .limit(limit_val)
             )
             docs = list(query.stream())
         except Exception as index_error:
             # If index doesn't exist or there's an error, fall back to simple query
             print(f"Falling back to simple query: {index_error}")
-            query = messages_ref.where("channel_id", "==", channel_id).limit(limit_val)
+            query = messages_ref.where("channel_id", "==", channel_id)
+            
+            if is_announcement == "true":
+                query = query.where("is_announcement", "==", True)
+                
+            query = query.limit(limit_val)
             docs = list(query.stream())
 
         # Verify organization access (optional but recommended if channel_id isn't enough)
         # For now, relying on channel_id being scoped to org via group/channel creation
 
         messages = [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        # Reverse to show oldest first (if we got them in descending order)
-        messages.reverse()
+        
+        # Ensure messages are sorted by created_at (oldest first)
+        # This handles both the sorted DB query (which returns newest first, so we reverse)
+        # and the fallback query (which might return in any order)
+        messages.sort(key=lambda x: x.get('created_at', ''))
+        
         return jsonify(messages)
     except Exception as e:
         print(f"Error in get_messages: {e}")

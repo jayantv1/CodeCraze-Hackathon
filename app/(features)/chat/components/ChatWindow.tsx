@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useChat } from '../hooks/useChat';
 import Message from './Message';
 import InputBox from './InputBox';
+import PinnedMessages from './PinnedMessages';
 import { Channel } from '@/lib/types';
 
 interface ChatWindowProps {
@@ -15,13 +16,21 @@ interface ChatWindowProps {
 export default function ChatWindow({ channel, currentUserId, currentUserName }: ChatWindowProps) {
     const { messages, loading, error, sendMessage } = useChat(channel?.id || null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [showPins, setShowPins] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
-        scrollToBottom();
+        // Only auto-scroll if user is already near the bottom (within 100px)
+        const container = messagesEndRef.current?.parentElement;
+        if (container) {
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+            if (isNearBottom) {
+                scrollToBottom();
+            }
+        }
     }, [messages]);
 
     const handleSendMessage = async (content: string, isAnnouncement: boolean) => {
@@ -29,6 +38,19 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
             await sendMessage(content, currentUserId, currentUserName, isAnnouncement);
         } catch (err) {
             console.error('Failed to send message:', err);
+        }
+    };
+
+    const handleJumpToMessage = (messageId: string) => {
+        const element = document.getElementById(`message-${messageId}`);
+        if (element) {
+            setShowPins(false); // Close the pinned panel
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Highlight the message briefly
+            element.classList.add('ring-2', 'ring-yellow-400', 'rounded-lg');
+            setTimeout(() => {
+                element.classList.remove('ring-2', 'ring-yellow-400', 'rounded-lg');
+            }, 2000);
         }
     };
 
@@ -60,10 +82,25 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
                     </h2>
                     <p className="text-xs text-gray-400">{channel.description || 'No description'}</p>
                 </div>
+                <button
+                    onClick={() => setShowPins(!showPins)}
+                    className={`p-2 rounded-lg transition-colors ${showPins ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
+                    title="Pinned Messages"
+                >
+                    📌
+                </button>
             </div>
 
+            {showPins && (
+                <PinnedMessages
+                    channelId={channel.id}
+                    onClose={() => setShowPins(false)}
+                    onJumpToMessage={handleJumpToMessage}
+                />
+            )}
+
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 z-10">
+            <div className="flex-1 overflow-y-auto p-6 z-10">
                 {loading && (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-gray-400">Loading messages...</div>
@@ -82,13 +119,20 @@ export default function ChatWindow({ channel, currentUserId, currentUserName }: 
                         </div>
                     </div>
                 )}
-                {messages.map((msg) => (
-                    <Message
-                        key={msg.id}
-                        message={msg}
-                        isCurrentUser={msg.author_id === currentUserId}
-                    />
-                ))}
+                {messages.map((msg, index) => {
+                    const prevMsg = index > 0 ? messages[index - 1] : null;
+                    const isGroupStart = !prevMsg || prevMsg.author_id !== msg.author_id;
+
+                    return (
+                        <Message
+                            key={msg.id}
+                            id={`message-${msg.id}`}
+                            message={msg}
+                            isCurrentUser={msg.author_id === currentUserId}
+                            isGroupStart={isGroupStart}
+                        />
+                    );
+                })}
                 <div ref={messagesEndRef} />
             </div>
 
