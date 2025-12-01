@@ -96,15 +96,17 @@ export default function Message({ message, isCurrentUser = false, isGroupStart =
                             }`}>
                             {message.author_name || 'Unknown User'}
                         </span>
-                        {message.is_announcement && !isPinnedView && (
-                            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">
-                                📢 Announcement
-                            </span>
-                        )}
                         <span className="text-xs text-gray-500">{formatTime(message.created_at)}</span>
                     </div>
                 )}
-                <p className={`text-gray-300 leading-relaxed break-words ${isGroupStart ? 'mt-1' : ''}`}>
+                {message.is_announcement && !isPinnedView && (
+                    <div className={`flex items-center ${isGroupStart ? 'mt-1' : ''}`}>
+                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">
+                            📢 Announcement
+                        </span>
+                    </div>
+                )}
+                <p className={`text-gray-300 leading-relaxed break-words ${isGroupStart || message.is_announcement ? 'mt-1' : ''}`}>
                     {formatMessage(message.content)}
                 </p>
             </div>
