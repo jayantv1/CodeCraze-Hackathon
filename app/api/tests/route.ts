@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const FLASK_API_URL = process.env.FLASK_API_URL || 'http://localhost:5000';
+const FLASK_API_URL = process.env.FLASK_API_URL || 'http://127.0.0.1:5328';
 
 export async function GET(request: Request) {
     try {
@@ -54,4 +54,3 @@ export async function POST(request: Request) {
         }, { status: 500 });
     }
 }
-

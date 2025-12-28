@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const FLASK_API_URL = process.env.FLASK_API_URL || 'http://localhost:5000';
+const FLASK_API_URL = process.env.FLASK_API_URL || 'http://127.0.0.1:5328';
 
 export async function POST(request: Request) {
     try {
@@ -17,4 +17,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to check conflict' }, { status: 500 });
     }
 }
-
