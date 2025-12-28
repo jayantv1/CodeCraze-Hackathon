@@ -1,0 +1,107 @@
+---
+LümFlare Platform Documentation
+---
+
+LümFlare is a social media and communication platform designed specifically for teachers within school districts.
+
+---
+
+Core Features:
+
+1. CHAT & COMMUNICATION
+   - Create and join group chats organized by subject, department, grade level, or clubs
+   - Private and public groups available
+   - Direct messaging between teachers
+   - Announcements feature: Superintendents and administrators can post pinned announcements
+   - Real-time messaging with message history
+
+2. THE STREAM (FEED)
+   - LinkedIn-style feed where teachers can post updates
+   - Post scopes: "My School", "My District", or specific "Groups"
+   - Support for text and image posts
+   - Share events, achievements, and updates with colleagues
+
+3. CALENDAR & TEST SCHEDULING
+   - Interactive calendar view showing scheduled tests
+   - Filter by Grade Level or Class
+   - Conflict detection: When scheduling a test, the system checks for existing tests on the same date for the same target audience
+   - Warning system: If a conflict is detected, teachers receive a prompt asking if they want to proceed
+   - Helps coordinate test dates to reduce student stress
+
+4. AI TEACHING ASSISTANT
+   - Upload instructional files (PDF, DOCX, PPTX, TXT)
+   - Ask questions about uploaded materials
+   - Generate educational materials: worksheets, quizzes, tests, assignments
+   - Download generated materials directly from chat
+   - Context-aware responses based on your uploaded documents
+
+---
+
+How to Use Chat:
+
+1. Navigate to the Chat section from the sidebar
+2. Select or create a channel/group
+3. Type your message in the input box
+4. Use @mentions to tag other teachers
+5. Administrators can post announcements that appear pinned
+
+---
+
+How to Use The Stream:
+
+1. Go to the Stream/Feed section
+2. Click "Create Post"
+3. Choose your post scope (School, District, or Group)
+4. Add text and/or images
+5. Post to share with colleagues
+
+---
+
+How to Use Calendar:
+
+1. Navigate to Calendar section
+2. View scheduled tests
+3. Click "Schedule Test" to add a new test
+4. Select date, grade level, and class
+5. System will warn if conflicts exist
+6. Confirm or reschedule as needed
+
+---
+
+How to Use AI Teaching Assistant:
+
+1. Open the AI Assistant from the sidebar or dashboard
+2. Upload instructional files by clicking the upload button or dragging files
+3. Wait for files to be processed and indexed
+4. Ask questions about your uploaded materials
+5. Request material generation: "Create a quiz about photosynthesis"
+6. Download generated materials by clicking the download button
+
+---
+
+User Roles:
+
+- Teacher: Standard user with access to all features
+- Administrator/Superintendent: Can post announcements and manage groups
+- All users can create groups, post to feed, and use calendar
+
+---
+
+Best Practices:
+
+- Use groups to organize by subject or department
+- Check calendar before scheduling tests
+- Upload relevant materials to AI assistant for better context
+- Use announcements for important district-wide information
+- Share achievements and events on The Stream
+
+---
+
+Technical Details:
+
+- Built with Next.js, React, TypeScript
+- Backend: Flask (Python) and Firebase
+- Real-time updates via Firebase Firestore
+- File storage in Firebase Storage
+- AI powered by Google Gemini
+

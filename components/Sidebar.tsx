@@ -26,6 +26,7 @@ const Sidebar = () => {
         { href: '/dashboard', label: 'Stream' },
         { href: '/chat', label: 'Messages' },
         { href: '/calendar', label: 'Calendar' },
+        { href: '/ai-assistant', label: 'AI Assistant' },
         ...(userData?.role === 'admin' ? [{ href: '/admin', label: 'Admin' }] : []),
     ];
 
