@@ -4,6 +4,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
+import UserProfileViewer from '@/components/UserProfileViewer';
 
 interface Test {
     id: string;
@@ -11,6 +12,7 @@ interface Test {
     date: string;
     target_audience: string;
     teacher_name: string;
+    teacher_id?: string;
 }
 
 interface ConflictData {
@@ -46,6 +48,9 @@ export default function CalendarPage() {
     const [teacherClasses, setTeacherClasses] = useState<Class[]>([]);
     const [teacherExams, setTeacherExams] = useState<Exam[]>([]);
     const [loadingConflictInfo, setLoadingConflictInfo] = useState(false);
+
+    // Profile viewer state
+    const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
 
     // Form State
     const [title, setTitle] = useState('');
@@ -92,7 +97,7 @@ export default function CalendarPage() {
 
     const fetchConflictDetails = async (teacherId: string) => {
         if (!userData?.organizationId || !teacherId) return;
-        
+
         setLoadingConflictInfo(true);
         try {
             // Fetch teacher's classes and students
@@ -167,16 +172,23 @@ export default function CalendarPage() {
                 }),
             });
 
+            const data = await res.json();
+
             if (res.ok) {
+                console.log('Test scheduled successfully:', data);
                 setShowModal(false);
                 setTitle('');
                 setConflictData(null);
                 setTeacherClasses([]);
                 setTeacherExams([]);
-                fetchTests();
+                await fetchTests();
+            } else {
+                console.error('Failed to schedule test:', data);
+                alert(`Failed to schedule test: ${data.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error scheduling test:', error);
+            alert('Failed to schedule test. Please try again.');
         }
     };
 
@@ -252,8 +264,8 @@ export default function CalendarPage() {
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-2xl font-bold text-white">Schedule Test</h2>
                                     <button
-                                        onClick={() => { 
-                                            setShowModal(false); 
+                                        onClick={() => {
+                                            setShowModal(false);
                                             setConflictData(null);
                                             setTeacherClasses([]);
                                             setTeacherExams([]);
@@ -313,7 +325,20 @@ export default function CalendarPage() {
                                                             {conflictData.existing_tests.map((test) => (
                                                                 <div key={test.id} className="bg-red-500/20 rounded-lg p-2 text-sm">
                                                                     <p className="font-medium text-red-200">{test.title}</p>
-                                                                    <p className="text-red-300/70 text-xs">By {test.teacher_name} • {test.target_audience}</p>
+                                                                    <p className="text-red-300/70 text-xs">
+                                                                        By{' '}
+                                                                        {test.teacher_id ? (
+                                                                            <button
+                                                                                onClick={() => setSelectedTeacherId(test.teacher_id!)}
+                                                                                className="hover:underline cursor-pointer"
+                                                                            >
+                                                                                {test.teacher_name}
+                                                                            </button>
+                                                                        ) : (
+                                                                            test.teacher_name
+                                                                        )}
+                                                                        {' • '}{test.target_audience}
+                                                                    </p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -417,8 +442,8 @@ export default function CalendarPage() {
                                     <div className="flex justify-end gap-3 mt-8">
                                         <button
                                             type="button"
-                                            onClick={() => { 
-                                                setShowModal(false); 
+                                            onClick={() => {
+                                                setShowModal(false);
                                                 setConflictData(null);
                                                 setTeacherClasses([]);
                                                 setTeacherExams([]);
@@ -439,6 +464,14 @@ export default function CalendarPage() {
                         </div>
                     )}
                 </div>
+
+                {/* User Profile Viewer */}
+                {selectedTeacherId && (
+                    <UserProfileViewer
+                        userId={selectedTeacherId}
+                        onClose={() => setSelectedTeacherId(null)}
+                    />
+                )}
             </main>
         </div>
     );

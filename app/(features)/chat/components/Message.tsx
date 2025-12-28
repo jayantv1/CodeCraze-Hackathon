@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Message as MessageType } from '@/lib/types';
+import { Message as MessageType, User } from '@/lib/types';
+import UserProfileViewer from '@/components/UserProfileViewer';
+import ProfileModal from '@/components/ProfileModal';
+import { useAuth } from '@/context/AuthContext';
 
 interface MessageProps {
     message: MessageType;
@@ -17,8 +20,26 @@ interface MessageProps {
 }
 
 export default function Message({ message, isCurrentUser = false, isGroupStart = true, isPinnedView = false, id, currentUserId, onDelete, selectionMode = false, isSelected = false, onToggleSelect }: MessageProps) {
+    const { userData: currentUserData } = useAuth();
     const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
     const [isDeleting, setIsDeleting] = React.useState(false);
+    const [showProfile, setShowProfile] = React.useState(false);
+    const [showOwnProfile, setShowOwnProfile] = React.useState(false);
+    const [profileUser, setProfileUser] = React.useState<User | null>(null);
+    const [loadingProfile, setLoadingProfile] = React.useState(false);
+    const handleNameClick = async () => {
+        if (isCurrentUser) {
+            // Show editable profile for current user
+            if (currentUserData) {
+                setProfileUser(currentUserData as User);
+                setShowOwnProfile(true);
+            }
+        } else {
+            // Show read-only profile for other users
+            setShowProfile(true);
+        }
+    };
+
     const getInitials = (name: string) => {
         if (!name) return '?';
         return name
@@ -141,10 +162,18 @@ export default function Message({ message, isCurrentUser = false, isGroupStart =
             <div className="flex-1 min-w-0">
                 {isGroupStart && (
                     <div className="flex items-baseline space-x-2">
-                        <span className={`font-bold hover:underline cursor-pointer truncate max-w-[200px] ${message.is_announcement ? 'text-yellow-400' : 'text-white'
-                            }`}>
+                        <button
+                            className={`font-bold hover:underline cursor-pointer truncate max-w-[200px] text-left ${message.is_announcement ? 'text-yellow-400' : 'text-white'
+                                }`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                handleNameClick();
+                            }}
+                            type="button"
+                        >
                             {message.author_name || 'Unknown User'}
-                        </span>
+                        </button>
                         <span className="text-xs text-gray-500">{formatTime(message.created_at)}</span>
                     </div>
                 )}
@@ -199,6 +228,27 @@ export default function Message({ message, isCurrentUser = false, isGroupStart =
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* User Profile Viewer - for other users */}
+            {showProfile && !isCurrentUser && (
+                <UserProfileViewer
+                    userId={message.author_id}
+                    onClose={() => setShowProfile(false)}
+                />
+            )}
+
+            {/* Profile Modal - for current user (editable) */}
+            {showOwnProfile && profileUser && (
+                <ProfileModal
+                    isOpen={showOwnProfile}
+                    onClose={() => {
+                        setShowOwnProfile(false);
+                        setProfileUser(null);
+                    }}
+                    user={profileUser}
+                    isOwnProfile={true}
+                />
             )}
         </div>
     );

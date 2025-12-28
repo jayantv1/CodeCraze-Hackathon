@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import UserPicker from './UserPicker';
+import UserProfileViewer from '@/components/UserProfileViewer';
+import ProfileModal from '@/components/ProfileModal';
+import { User } from '@/lib/types';
 
 interface GroupMember {
     user_id: string;
@@ -50,9 +53,27 @@ export default function GroupSettings({
     const [showAddMembers, setShowAddMembers] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<OrgUser[]>([]);
 
+    // Profile viewer state
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [showOwnProfile, setShowOwnProfile] = useState(false);
+    const [profileUser, setProfileUser] = useState<User | null>(null);
+
     useEffect(() => {
         fetchMembers();
     }, [groupId]);
+
+    const handleMemberNameClick = async (userId: string) => {
+        if (userData?.uid === userId) {
+            // Show editable profile for current user
+            if (userData) {
+                setProfileUser(userData as User);
+                setShowOwnProfile(true);
+            }
+        } else {
+            // Show read-only profile for other users
+            setSelectedUserId(userId);
+        }
+    };
 
     const fetchMembers = async () => {
         try {
@@ -332,7 +353,12 @@ export default function GroupSettings({
                                                 </div>
                                                 <div>
                                                     <div className="font-medium text-white">
-                                                        {member.user_name}
+                                                        <button
+                                                            onClick={() => handleMemberNameClick(member.user_id)}
+                                                            className="hover:underline cursor-pointer text-left"
+                                                        >
+                                                            {member.user_name}
+                                                        </button>
                                                         {userData?.uid === member.user_id && <span className="text-gray-400 text-xs ml-2">(You)</span>}
                                                     </div>
                                                     <div className="text-sm text-gray-400">{member.user_email}</div>
@@ -386,6 +412,27 @@ export default function GroupSettings({
                     )}
                 </div>
             </div>
+
+            {/* User Profile Viewer - for other users */}
+            {selectedUserId && userData?.uid !== selectedUserId && (
+                <UserProfileViewer
+                    userId={selectedUserId}
+                    onClose={() => setSelectedUserId(null)}
+                />
+            )}
+
+            {/* Profile Modal - for current user (editable) */}
+            {showOwnProfile && profileUser && (
+                <ProfileModal
+                    isOpen={showOwnProfile}
+                    onClose={() => {
+                        setShowOwnProfile(false);
+                        setProfileUser(null);
+                    }}
+                    user={profileUser}
+                    isOwnProfile={true}
+                />
+            )}
         </div>
     );
 }

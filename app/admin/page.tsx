@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import ProfileModal from '@/components/ProfileModal';
+import UserProfileViewer from '@/components/UserProfileViewer';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/types';
@@ -19,6 +20,8 @@ export default function AdminPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+    const [showOwnProfile, setShowOwnProfile] = useState(false);
 
     useEffect(() => {
         if (!loading && (!user || userData?.role !== 'admin')) {
@@ -124,6 +127,14 @@ export default function AdminPage() {
             }
         } catch (error) {
             setError('An error occurred while updating the user role');
+        }
+    };
+
+    const handleUserNameClick = (clickedUser: User) => {
+        if (user?.uid === clickedUser.id) {
+            setEditingUser(clickedUser);
+        } else {
+            setViewingUserId(clickedUser.id);
         }
     };
 
@@ -234,7 +245,12 @@ export default function AdminPage() {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-white">{u.displayName || u.name}</p>
+                                                        <button
+                                                            onClick={() => handleUserNameClick(u)}
+                                                            className="font-medium text-white hover:underline cursor-pointer text-left"
+                                                        >
+                                                            {u.displayName || u.name}
+                                                        </button>
                                                         <p className="text-xs text-gray-400">{u.position}</p>
                                                     </div>
                                                 </div>
@@ -285,6 +301,14 @@ export default function AdminPage() {
                         }}
                         user={editingUser}
                         isOwnProfile={false}
+                    />
+                )}
+
+                {/* User Profile Viewer - for other users only */}
+                {viewingUserId && user?.uid !== viewingUserId && (
+                    <UserProfileViewer
+                        userId={viewingUserId}
+                        onClose={() => setViewingUserId(null)}
                     />
                 )}
             </main>
