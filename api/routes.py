@@ -233,29 +233,40 @@ def check_conflict():
     data = request.json
     date_str = data.get("date")  # Format: YYYY-MM-DD
     target_audience = data.get("target_audience")  # e.g., "Grade 10"
+    teacher_id = data.get("teacher_id")
 
     if not date_str or not target_audience:
         return jsonify({"error": "Date and target audience required"}), 400
 
-    # Query for tests on the same date and audience
+    # Query for tests on the same date (ANY test, not just same audience)
     org_id = data.get("organizationId")
     if not org_id:
         return jsonify({"error": "Organization ID required"}), 400
 
     tests_ref = db().collection("tests")
+    # Check for ANY test on the same date
     query = (
         tests_ref.where("organizationId", "==", org_id)
         .where("date", "==", date_str)
-        .where("target_audience", "==", target_audience)
     )
     docs = list(query.stream())
 
     if len(docs) > 0:
+        existing_tests = [{"id": d.id, **d.to_dict()} for d in docs]
+        # Count tests for the same target audience
+        same_audience_count = sum(1 for t in existing_tests if t.get("target_audience") == target_audience)
+        
+        message = f"There are already {len(docs)} test(s) scheduled on {date_str}."
+        if same_audience_count > 0:
+            message += f" {same_audience_count} of them are for {target_audience}."
+        
         return jsonify(
             {
                 "conflict": True,
-                "message": f"There are already {len(docs)} test(s) scheduled for {target_audience} on {date_str}.",
-                "existing_tests": [{"id": d.id, **d.to_dict()} for d in docs],
+                "message": message,
+                "existing_tests": existing_tests,
+                "conflict_count": len(docs),
+                "same_audience_count": same_audience_count,
             }
         )
 
@@ -284,6 +295,68 @@ def schedule_test():
 
     update_time, test_ref = db().collection("tests").add(test_data)
     return jsonify({"id": test_ref.id, "message": "Test scheduled"}), 201
+
+
+# --- TEACHER CLASSES & STUDENTS ---
+@api.route("/api/teachers/<teacher_id>/classes", methods=["GET"])
+def get_teacher_classes(teacher_id):
+    """Get all classes taught by a teacher and their students"""
+    if not db():
+        return jsonify({"error": "Database not connected"}), 500
+    
+    org_id = request.args.get("organizationId")
+    if not org_id:
+        return jsonify({"error": "Organization ID required"}), 400
+    
+    try:
+        # Get classes for this teacher
+        classes_ref = db().collection("classes")
+        query = classes_ref.where("organizationId", "==", org_id).where("teacher_id", "==", teacher_id)
+        class_docs = list(query.stream())
+        
+        classes_data = []
+        for class_doc in class_docs:
+            class_data = {"id": class_doc.id, **class_doc.to_dict()}
+            
+            # Get students in this class
+            students_ref = class_doc.reference.collection("students")
+            student_docs = list(students_ref.stream())
+            students = [{"id": s.id, **s.to_dict()} for s in student_docs]
+            class_data["students"] = students
+            
+            classes_data.append(class_data)
+        
+        return jsonify({"classes": classes_data})
+    except Exception as e:
+        return jsonify({"error": str(e), "classes": []}), 500
+
+
+# --- TEACHER'S OTHER EXAMS ---
+@api.route("/api/teachers/<teacher_id>/exams", methods=["GET"])
+def get_teacher_exams(teacher_id):
+    """Get all exams scheduled by a teacher"""
+    if not db():
+        return jsonify({"error": "Database not connected"}), 500
+    
+    org_id = request.args.get("organizationId")
+    if not org_id:
+        return jsonify({"error": "Organization ID required"}), 400
+    
+    try:
+        tests_ref = db().collection("tests")
+        query = (
+            tests_ref.where("organizationId", "==", org_id)
+            .where("teacher_id", "==", teacher_id)
+        )
+        docs = list(query.stream())
+        exams = [{"id": doc.id, **doc.to_dict()} for doc in docs]
+        
+        # Sort by date
+        exams.sort(key=lambda x: x.get("date", ""))
+        
+        return jsonify({"exams": exams})
+    except Exception as e:
+        return jsonify({"error": str(e), "exams": []}), 500
 
 
 # --- CHANNELS ---
