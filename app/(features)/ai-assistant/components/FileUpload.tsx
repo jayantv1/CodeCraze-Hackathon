@@ -3,11 +3,12 @@
 import { useState, DragEvent, ChangeEvent } from 'react';
 
 interface FileUploadProps {
-  onUpload: (file: File) => void;
+  onUpload: (files: File[]) => void;
   disabled?: boolean;
 }
 
 export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
+
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnter = (e: DragEvent) => {
@@ -41,14 +42,14 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
     });
 
     if (validFiles.length > 0) {
-      onUpload(validFiles[0]); // Upload first valid file
+      onUpload(validFiles); // Upload all valid files
     }
   };
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onUpload(files[0]);
+      onUpload(Array.from(files));
     }
   };
 
@@ -67,6 +68,7 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
       <input
         id="file-input"
         type="file"
+        multiple
         accept=".pdf,.docx,.pptx,.txt"
         onChange={handleFileSelect}
         className="hidden"

@@ -196,7 +196,7 @@ def generate_material():
             from lib.pdf_generator import markdown_to_pdf
             import base64
             
-            title_text = f"{kwargs.get('topic', material_type).capitalize()} Worksheet" if kwargs.get('topic') else f"{material_type.capitalize()} Worksheet"
+            title_text = f"{kwargs.get('topic', material_type).title()} Worksheet" if kwargs.get('topic') else f"{material_type.title()} Worksheet"
             pdf_bytes = markdown_to_pdf(result['content'], title=title_text)
             pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
         except Exception as e:
