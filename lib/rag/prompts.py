@@ -80,7 +80,31 @@ Topic: {topic}
 Number of Questions: {num_questions}
 Format: {format}
 
-Create a comprehensive worksheet with clear instructions, appropriate questions/exercises, and space for student responses."""
+Generate the material strictly following this structure. Do NOT include any intro or outro text (like "Here is the worksheet"), just the worksheet content.
+
+Structure:
+Title: [Topic] Worksheet
+
+Part A: Multiple Choice
+1. Question
+A. Option
+...
+
+Part B: Fill in the Blank
+...
+
+Part C: Open-Ended Questions
+...
+
+Part D: Challenge Question (Optional)
+...
+
+Answer Key Summary (Optional)
+...
+
+Make sure to use standard numbering (1., 2., etc.) and lettered options (A., B., etc.). Use Times New Roman friendly formatting.
+If the content includes any diagrams, code snippets, or ascii art, enclose them in triple backticks (```).
+Do NOT use separate lines with just a backslash (\)."""
 
 QUIZ_PROMPT = """Generate a quiz based on the following context and requirements:
 

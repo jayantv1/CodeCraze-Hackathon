@@ -78,40 +78,60 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
     }
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (files: File[]) => {
     try {
       setIsLoading(true);
       const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error('Not authenticated');
 
-      const formData = new FormData();
-      formData.append('file', file);
+      for (const file of files) {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
 
-      const response = await fetch('/api/rag/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+          const response = await fetch('/api/rag/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
 
-      const data = await response.json();
+          const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload file');
+          if (!response.ok) {
+            // We'll log error but continue with other files if possible, or maybe throw.
+            // For better UX, let's individualize success/error.
+            setMessages(prev => [...prev, {
+              id: `error-${Date.now()}-${file.name}`,
+              role: 'assistant',
+              content: `❌ Error uploading "${file.name}": ${data.error || 'Failed to upload'}`,
+              timestamp: new Date(),
+            }]);
+            continue;
+          }
+
+          // Add success message
+          setMessages(prev => [...prev, {
+            id: `upload-${Date.now()}-${file.name}`,
+            role: 'assistant',
+            content: `✅ Successfully uploaded and indexed "${file.name}". You can now ask questions about this document!`,
+            timestamp: new Date(),
+          }]);
+        } catch (fileError: any) {
+          setMessages(prev => [...prev, {
+            id: `error-${Date.now()}-${file.name}`,
+            role: 'assistant',
+            content: `❌ Error uploading "${file.name}": ${fileError.message}`,
+            timestamp: new Date(),
+          }]);
+        }
       }
 
-      // Add success message
-      setMessages(prev => [...prev, {
-        id: `upload-${Date.now()}`,
-        role: 'assistant',
-        content: `✅ Successfully uploaded and indexed "${file.name}". You can now ask questions about this document!`,
-        timestamp: new Date(),
-      }]);
-
-      // Refresh documents
+      // Refresh documents after all attempts
       fetchDocuments();
     } catch (error: any) {
+      // Global error (e.g. auth failed)
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
         role: 'assistant',

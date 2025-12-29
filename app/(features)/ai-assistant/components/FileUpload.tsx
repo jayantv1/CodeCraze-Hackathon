@@ -3,11 +3,12 @@
 import { useState, DragEvent, ChangeEvent } from 'react';
 
 interface FileUploadProps {
-  onUpload: (file: File) => void;
+  onUpload: (files: File[]) => void;
   disabled?: boolean;
 }
 
 export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
+
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnter = (e: DragEvent) => {
@@ -41,24 +42,23 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
     });
 
     if (validFiles.length > 0) {
-      onUpload(validFiles[0]); // Upload first valid file
+      onUpload(validFiles); // Upload all valid files
     }
   };
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onUpload(files[0]);
+      onUpload(Array.from(files));
     }
   };
 
   return (
     <div
-      className={`mb-3 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-        isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`mb-3 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isDragging
+        ? 'border-blue-500 bg-blue-50'
+        : 'border-gray-300 hover:border-gray-400'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -68,6 +68,7 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
       <input
         id="file-input"
         type="file"
+        multiple
         accept=".pdf,.docx,.pptx,.txt"
         onChange={handleFileSelect}
         className="hidden"

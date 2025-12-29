@@ -8,6 +8,7 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.graphics.shapes import Drawing, Line
 
 def markdown_to_pdf(text, title="Worksheet"):
     """
@@ -82,9 +83,58 @@ def markdown_to_pdf(text, title="Worksheet"):
     in_code_block = False
     code_buffer = []
     
+    # Filter out initial conversational fluff
+    start_index = 0
+    conversational_prefixes = [
+        "sure", "certainly", "of course", "here is", "here's", "okay", 
+        "i have generated", "please find", "based on", "generated"
+    ]
+    
+    for i, line in enumerate(lines):
+        stripped_lower = line.strip().lower()
+        if not stripped_lower:
+            start_index = i + 1
+            continue
+            
+        # Check if line starts with conversational filler
+        is_conversational = any(stripped_lower.startswith(prefix) for prefix in conversational_prefixes)
+        
+        # Also check for lines that end with specific punctuation often used in intros (like ":") 
+        # but avoid headers (which might not have punctuation or start with #)
+        if is_conversational:
+            start_index = i + 1
+            continue
+        
+        # If we reached here, we found non-conversational content (or a header)
+        # However, sometimes "Title: ..." is what we want. 
+        # If the line starts with "Title:" or "Part" or "#" or "1.", it's definitely content.
+        # If it's just a sentence like "Read the questions below", that's also content.
+        # The filter mainly targetted the LLM acknowledging the request.
+        break
+        
+    lines = lines[start_index:]
+    
+    # We also want to skip the title if it appears again in the first few lines of the body
+    # Normalized check for title repetition
+    normalized_title = title.lower().strip()
+    
+    # We also want to skip the title if it appears again in the first few lines of the body
+    # Normalized check for title repetition
+    normalized_title = title.lower().strip()
+    
+    current_section_has_questions = False
+
     for line in lines:
         stripped_line = line.strip()
         
+        # Check if this line is just a repetition of the title
+        if stripped_line.lower().strip() == normalized_title:
+             continue
+        if stripped_line.lower().strip().replace('*', '').replace('#', '').strip() == normalized_title:
+             continue
+        if stripped_line.lower().startswith("title:") and "worksheet" in stripped_line.lower():
+             continue
+             
         # skip lines that are just a backslash (artifact) using a regex or stricter check
         # The user mentioned "/" but screenshot showed "\". I'll filter both if they are standalone.
         if stripped_line in ['\\', '/', "'"] or re.match(r'^[\\/]+$', stripped_line):
@@ -118,12 +168,28 @@ def markdown_to_pdf(text, title="Worksheet"):
             
         # Check for Headers
         if stripped_line.startswith('###') or stripped_line.startswith('Part '):
+            # New section, reset question counter
+            current_section_has_questions = False
+            
             content = stripped_line.replace('###', '').strip()
             content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', content)
             story.append(Paragraph(content, heading_style))
             
         # Check for List items (Questions)
         elif stripped_line.startswith(('-', '*', '1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.')) or re.match(r'^\d+\.', stripped_line):
+            # If it looks like a numbered question (starts with digit + dot)
+            is_numbered_question = re.match(r'^\d+\.', stripped_line)
+            
+            if is_numbered_question:
+                if current_section_has_questions:
+                    # Add divider between questions
+                    d = Drawing(500, 10)
+                    d.add(Line(0, 5, 500, 5, strokeColor=colors.gray, strokeWidth=0.5))
+                    story.append(Spacer(1, 5))
+                    story.append(d)
+                    story.append(Spacer(1, 5))
+                current_section_has_questions = True
+            
             content = stripped_line
             content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', content)
             story.append(Paragraph(content, normal_style))
