@@ -54,11 +54,10 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
 
   return (
     <div
-      className={`mb-3 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-        isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`mb-3 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isDragging
+          ? 'border-purple-500 bg-purple-500/20'
+          : 'border-white/20 hover:border-white/30'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -73,10 +72,10 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
         className="hidden"
         disabled={disabled}
       />
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-200">
         📎 Drag and drop a file here, or click to select
       </p>
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="text-xs text-gray-400 mt-1">
         Supported formats: PDF, DOCX, PPTX, TXT
       </p>
     </div>

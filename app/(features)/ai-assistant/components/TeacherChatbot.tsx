@@ -270,20 +270,26 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-50 border-r flex flex-col">
-        <div className="p-4 border-b">
-          <h2 className="font-semibold text-gray-900">Tools</h2>
+      <div className="w-64 bg-gradient-to-b from-gray-900 via-purple-900/50 to-gray-900 text-white border-r border-purple-500/20 flex flex-col">
+        <div className="p-4 border-b border-purple-500/20">
+          <h2 className="font-semibold text-white">Tools</h2>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           <button
             onClick={() => setShowDocuments(!showDocuments)}
-            className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all ${showDocuments
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/30'
+              : 'hover:bg-white/10 text-gray-300 hover:text-white'
+              }`}
           >
             📄 My Documents ({documents.length})
           </button>
           <button
             onClick={() => setShowMaterialGenerator(!showMaterialGenerator)}
-            className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all ${showMaterialGenerator
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/30'
+              : 'hover:bg-white/10 text-gray-300 hover:text-white'
+              }`}
           >
             ✨ Generate Material
           </button>
@@ -297,7 +303,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
           isLoading={isLoading}
           messagesEndRef={messagesEndRef}
         />
-        <div className="border-t bg-white p-4">
+        <div className="border-t border-white/10 bg-white/5 backdrop-blur-lg p-4">
           <FileUpload onUpload={handleFileUpload} disabled={isLoading} />
           <ChatInput
             onSend={handleSendMessage}
@@ -309,12 +315,12 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
 
       {/* Documents Panel */}
       {showDocuments && (
-        <div className="w-80 bg-white border-l flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center">
-            <h2 className="font-semibold text-gray-900">My Documents</h2>
+        <div className="w-80 bg-gradient-to-b from-gray-900/70 via-purple-900/30 to-gray-900/70 backdrop-blur-lg border-l border-purple-500/20 flex flex-col">
+          <div className="p-4 border-b border-purple-500/20 flex justify-between items-center">
+            <h2 className="font-semibold text-white">My Documents</h2>
             <button
               onClick={() => setShowDocuments(false)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-300 hover:text-white"
             >
               ✕
             </button>
@@ -328,12 +334,12 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
 
       {/* Material Generator Panel */}
       {showMaterialGenerator && (
-        <div className="w-96 bg-white border-l flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center">
-            <h2 className="font-semibold text-gray-900">Generate Material</h2>
+        <div className="w-96 bg-gradient-to-b from-gray-900/70 via-purple-900/30 to-gray-900/70 backdrop-blur-lg border-l border-purple-500/20 flex flex-col">
+          <div className="p-4 border-b border-purple-500/20 flex justify-between items-center">
+            <h2 className="font-semibold text-white">Generate Material</h2>
             <button
               onClick={() => setShowMaterialGenerator(false)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-300 hover:text-white"
             >
               ✕
             </button>

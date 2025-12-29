@@ -51,23 +51,23 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
           Material Type
         </label>
         <select
           value={materialType}
           onChange={(e) => setMaterialType(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
         >
-          <option value="worksheet">Worksheet</option>
-          <option value="quiz">Quiz</option>
-          <option value="test">Test</option>
-          <option value="assignment">Assignment</option>
+          <option value="worksheet" className="bg-gray-800">Worksheet</option>
+          <option value="quiz" className="bg-gray-800">Quiz</option>
+          <option value="test" className="bg-gray-800">Test</option>
+          <option value="assignment" className="bg-gray-800">Assignment</option>
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
           Topic *
         </label>
         <input
@@ -75,12 +75,12 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="e.g., Photosynthesis, World War II, Fractions"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
           Subject
         </label>
         <input
@@ -88,12 +88,12 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="e.g., Biology, History, Math"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
           Grade Level
         </label>
         <input
@@ -101,14 +101,14 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
           value={gradeLevel}
           onChange={(e) => setGradeLevel(e.target.value)}
           placeholder="e.g., 5th Grade, High School, AP"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
         />
       </div>
 
       {(materialType === 'worksheet' || materialType === 'quiz' || materialType === 'test') && (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Number of Questions
             </label>
             <input
@@ -116,12 +116,12 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
               value={numQuestions}
               onChange={(e) => setNumQuestions(e.target.value)}
               placeholder="e.g., 10"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Question Types
             </label>
             <input
@@ -129,13 +129,13 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
               value={questionTypes}
               onChange={(e) => setQuestionTypes(e.target.value)}
               placeholder="e.g., Multiple Choice, Short Answer, Essay"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
             />
           </div>
 
           {materialType === 'quiz' || materialType === 'test' ? (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-200 mb-2">
                 Time Limit
               </label>
               <input
@@ -143,14 +143,14 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
                 value={timeLimit}
                 onChange={(e) => setTimeLimit(e.target.value)}
                 placeholder="e.g., 30 minutes, 1 hour"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
               />
             </div>
           ) : null}
 
           {materialType === 'test' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-200 mb-2">
                 Total Points
               </label>
               <input
@@ -158,7 +158,7 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
                 value={totalPoints}
                 onChange={(e) => setTotalPoints(e.target.value)}
                 placeholder="e.g., 100"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
               />
             </div>
           )}
@@ -167,7 +167,7 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
 
       {materialType === 'assignment' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-200 mb-2">
             Requirements
           </label>
           <textarea
@@ -175,14 +175,14 @@ export default function MaterialGenerator({ onGenerate }: MaterialGeneratorProps
             onChange={(e) => setRequirements(e.target.value)}
             placeholder="e.g., 2-3 pages, include citations, use APA format"
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-gray-400"
           />
         </div>
       )}
 
       <button
         onClick={handleGenerate}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors font-medium"
       >
         Generate {materialType.charAt(0).toUpperCase() + materialType.slice(1)}
       </button>
