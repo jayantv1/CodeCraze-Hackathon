@@ -19,12 +19,17 @@ if not firebase_admin._apps:
     cred_path = os.path.join(os.getcwd(), 'serviceAccountKey.json')
     if os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
+        firebase_admin.initialize_app(cred, {
+            'storageBucket': FIREBASE_CONFIG['storageBucket']
+        })
     else:
         # Fallback to initializing with project ID (requires default credentials or public access)
         print("Warning: serviceAccountKey.json not found. Attempting to initialize with project ID.")
         try:
-            firebase_admin.initialize_app(options={'projectId': FIREBASE_CONFIG['projectId']})
+            firebase_admin.initialize_app(options={
+                'projectId': FIREBASE_CONFIG['projectId'],
+                'storageBucket': FIREBASE_CONFIG['storageBucket']
+            })
         except Exception as e:
              print(f"Failed to initialize Firebase: {e}")
 

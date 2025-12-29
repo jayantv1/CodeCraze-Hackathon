@@ -26,7 +26,14 @@ Context from uploaded documents:
 
 User question: {question}
 
-Please provide a helpful answer based on the context provided. If the context doesn't contain enough information, you can use your general knowledge but indicate when you're doing so."""
+Please provide a helpful answer based on the context provided. If the context doesn't contain enough information, you can use your general knowledge but indicate when you're doing so.
+
+Format your response using markdown syntax:
+- Use ### three hashtags for section headers
+- Use **double asterisks** for bold text
+- Use bullet points or numbered lists where appropriate
+- Use code blocks for any code snippets
+"""
 
 # Prompt template for material generation
 MATERIAL_GENERATION_PROMPT_TEMPLATE = """{system_prompt}
@@ -36,13 +43,32 @@ Context from uploaded documents:
 
 User request: {request}
 
-Please generate the requested educational material. Make sure it is:
-- Age/grade appropriate
-- Well-structured and clear
-- Ready to use in the classroom
-- Aligned with educational best practices
+Generate the material strictly following this structure. Do NOT include any intro or outro text, just the worksheet content.
 
-Generate the material in a format that can be easily downloaded and used."""
+Structure:
+Title: [Topic] Worksheet
+
+Part A: Multiple Choice
+1. Question
+A. Option
+...
+
+Part B: Fill in the Blank
+...
+
+Part C: Open-Ended Questions
+...
+
+Part D: Challenge Question (Optional)
+...
+
+Answer Key Summary (Optional)
+...
+
+Make sure to use standard numbering (1., 2., etc.) and lettered options (A., B., etc.). Use Times New Roman friendly formatting (no special emojis).
+
+If the content includes any diagrams, code snippets, or ascii art, enclose them in triple backticks (```) to preserve formatting.
+Do NOT use separate lines with just a backslash (\) for blank space, simply leave blank lines."""
 
 # Specific templates for different material types
 WORKSHEET_PROMPT = """Generate a worksheet based on the following context and requirements:

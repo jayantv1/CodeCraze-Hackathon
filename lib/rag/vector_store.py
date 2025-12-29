@@ -172,12 +172,21 @@ class FirestoreVectorStore:
     
     def get_user_documents(self, user_id: str) -> List[Dict]:
         """Get all documents for a user."""
-        docs = self.db.collection(self.COLLECTION_NAME)\
-            .where('user_id', '==', user_id)\
-            .order_by('created_at', direction='DESCENDING')\
-            .stream()
-        
-        return [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        try:
+            docs = self.db.collection(self.COLLECTION_NAME)\
+                .where('user_id', '==', user_id)\
+                .order_by('created_at', direction='DESCENDING')\
+                .stream()
+            return [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        except Exception as e:
+            print(f"Index error in get_user_documents, falling back to simple query: {e}")
+            docs = self.db.collection(self.COLLECTION_NAME)\
+                .where('user_id', '==', user_id)\
+                .stream()
+            result = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+            # Sort in memory
+            result.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+            return result
     
     def delete_document(self, document_id: str) -> None:
         """Delete document and all its chunks."""

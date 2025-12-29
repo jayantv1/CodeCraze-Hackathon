@@ -26,7 +26,7 @@ class RAGPipeline:
         Args:
             gemini_api_key: Google Gemini API key
         """
-        self.embedder = GeminiEmbedder(api_key or os.getenv('GEMINI_API_KEY'))
+        self.embedder = GeminiEmbedder(gemini_api_key or os.getenv('GEMINI_API_KEY'))
         self.vector_store = FirestoreVectorStore()
         self.chunker = TextChunker(chunk_size=1000, chunk_overlap=200)
         
@@ -34,7 +34,7 @@ class RAGPipeline:
         api_key = gemini_api_key or os.getenv('GEMINI_API_KEY')
         if api_key:
             genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
+            self.model = genai.GenerativeModel('models/gemini-2.5-pro')
         else:
             self.model = None
     
@@ -150,7 +150,16 @@ class RAGPipeline:
         
         try:
             response = self.model.generate_content(prompt)
-            answer = response.text if hasattr(response, 'text') else str(response)
+            try:
+                answer = response.text
+            except ValueError:
+                # Handle cases where response is not simple text (e.g. safety block or multipart)
+                if response.candidates and response.candidates[0].content.parts:
+                    answer = "".join([part.text for part in response.candidates[0].content.parts])
+                elif response.prompt_feedback and response.prompt_feedback.block_reason:
+                    answer = f"Response blocked: {response.prompt_feedback.block_reason}"
+                else:
+                    answer = "No text content generated."
         except Exception as e:
             answer = f"Error generating response: {str(e)}"
         
@@ -215,7 +224,15 @@ class RAGPipeline:
         
         try:
             response = self.model.generate_content(prompt)
-            content = response.text if hasattr(response, 'text') else str(response)
+            try:
+                content = response.text
+            except ValueError:
+                if response.candidates and response.candidates[0].content.parts:
+                    content = "".join([part.text for part in response.candidates[0].content.parts])
+                elif response.prompt_feedback and response.prompt_feedback.block_reason:
+                    content = f"Response blocked: {response.prompt_feedback.block_reason}"
+                else:
+                    content = "No content generated."
         except Exception as e:
             content = f"Error generating material: {str(e)}"
         

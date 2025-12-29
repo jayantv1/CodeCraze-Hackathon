@@ -8,7 +8,7 @@ import FileUpload from './FileUpload';
 import DocumentList from './DocumentList';
 import MaterialGenerator from './MaterialGenerator';
 
-interface Message {
+export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -20,6 +20,7 @@ interface Message {
   }>;
   materialContent?: string;
   materialType?: string;
+  pdfData?: string; // Base64 PDF data
 }
 
 interface Document {
@@ -225,6 +226,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
         sources: data.sources || [],
         materialContent: data.content,
         materialType: materialType,
+        pdfData: data.pdf_data
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {

@@ -14,8 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.rag.rag_pipeline import RAGPipeline
 from lib.rag.file_processors import FileProcessor
 from lib.firebase_admin import db, auth
-import firebase_admin
-from firebase_admin import storage
+from firebase_admin import credentials, initialize_app, storage
 
 rag_api = Blueprint('rag', __name__, url_prefix='/api/rag')
 
@@ -78,7 +77,7 @@ def upload_document():
             return jsonify({'error': 'No text extracted from file'}), 400
         
         # Upload to Firebase Storage
-        bucket = storage.bucket()
+        bucket = storage.bucket(name='lumflare-71d2f.firebasestorage.app')
         storage_path = f"rag_documents/{user_id}/{datetime.utcnow().isoformat()}_{file_name}"
         blob = bucket.blob(storage_path)
         blob.upload_from_string(file_content, content_type=mime_type)
@@ -192,9 +191,22 @@ def generate_material():
             **kwargs
         )
         
+        # Generate PDF
+        try:
+            from lib.pdf_generator import markdown_to_pdf
+            import base64
+            
+            title_text = f"{kwargs.get('topic', material_type).capitalize()} Worksheet" if kwargs.get('topic') else f"{material_type.capitalize()} Worksheet"
+            pdf_bytes = markdown_to_pdf(result['content'], title=title_text)
+            pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        except Exception as e:
+            print(f"Error generating PDF: {e}")
+            pdf_base64 = None
+        
         return jsonify({
             'success': True,
             'content': result['content'],
+            'pdf_data': pdf_base64,
             'sources': result['sources'],
             'metadata': result['metadata']
         }), 200
