@@ -6,7 +6,7 @@
     "flask-dev": "node scripts/flask-dev.js",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
-    "build": "next build --no-lint",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
