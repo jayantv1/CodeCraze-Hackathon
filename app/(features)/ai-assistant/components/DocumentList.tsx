@@ -1,6 +1,6 @@
 'use client';
 
-import { Document } from './TeacherChatbot';
+import { Document } from '@/types/ai-assistant';
 
 interface DocumentListProps {
   documents: Document[];

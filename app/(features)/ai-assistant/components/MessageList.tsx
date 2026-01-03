@@ -1,6 +1,6 @@
 'use client';
 
-import { Message } from './TeacherChatbot';
+import { Message } from '@/types/ai-assistant';
 import { downloadFile } from '@/lib/utils';
 
 import ReactMarkdown from 'react-markdown';

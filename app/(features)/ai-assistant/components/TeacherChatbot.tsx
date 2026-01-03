@@ -7,29 +7,7 @@ import ChatInput from './ChatInput';
 import FileUpload from './FileUpload';
 import DocumentList from './DocumentList';
 import MaterialGenerator from './MaterialGenerator';
-
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  sources?: Array<{
-    document_id?: string;
-    file_name: string;
-    score: number;
-  }>;
-  materialContent?: string;
-  materialType?: string;
-  pdfData?: string; // Base64 PDF data
-}
-
-export interface Document {
-  id: string;
-  file_name: string;
-  file_type: string;
-  created_at: string;
-  chunk_count: number;
-}
+import { Message, Document } from '@/types/ai-assistant';
 
 export default function TeacherChatbot({ userId }: { userId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
