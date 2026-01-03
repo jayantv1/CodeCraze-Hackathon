@@ -23,7 +23,7 @@ export interface Message {
   pdfData?: string; // Base64 PDF data
 }
 
-interface Document {
+export interface Document {
   id: string;
   file_name: string;
   file_type: string;
@@ -60,7 +60,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
 
   const fetchDocuments = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await auth?.currentUser?.getIdToken();
       if (!token) return;
 
       const response = await fetch('/api/rag/documents', {
@@ -81,7 +81,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
   const handleFileUpload = async (files: File[]) => {
     try {
       setIsLoading(true);
-      const token = await auth.currentUser?.getIdToken();
+      const token = await auth?.currentUser?.getIdToken();
       if (!token) throw new Error('Not authenticated');
 
       for (const file of files) {
@@ -157,7 +157,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
     setIsLoading(true);
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await auth?.currentUser?.getIdToken();
       if (!token) throw new Error('Not authenticated');
 
       const response = await fetch('/api/rag/query', {
@@ -215,7 +215,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
     setShowMaterialGenerator(false);
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await auth?.currentUser?.getIdToken();
       if (!token) throw new Error('Not authenticated');
 
       const response = await fetch('/api/rag/generate', {
@@ -263,7 +263,7 @@ export default function TeacherChatbot({ userId }: { userId: string }) {
 
   const handleDeleteDocument = async (documentId: string) => {
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await auth?.currentUser?.getIdToken();
       if (!token) return;
 
       const response = await fetch(`/api/rag/documents/${documentId}`, {

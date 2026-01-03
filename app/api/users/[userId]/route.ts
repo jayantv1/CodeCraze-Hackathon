@@ -4,10 +4,10 @@ const FLASK_API_URL = process.env.FLASK_API_URL || 'http://localhost:5328';
 
 export async function GET(
     request: Request,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
-        const userId = params.userId;
+        const { userId } = await params;
 
         if (!userId) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 });

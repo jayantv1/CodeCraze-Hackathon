@@ -1,29 +1,33 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 
-export async function GET(request: Request, { params }: { params: { groupId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ groupId: string }> }) {
     try {
-        console.log(`[GET /api/groups/${params.groupId}/members] Fetching members`);
-        const snapshot = await db.collection('groups').doc(params.groupId).collection('members').get();
+        const { groupId } = await params;
+        console.log(`[GET /api/groups/${groupId}/members] Fetching members`);
+        const snapshot = await db.collection('groups').doc(groupId).collection('members').get();
         const members = snapshot.docs.map(doc => {
             const data = doc.data();
             const member = {
                 ...data,
                 user_id: doc.id  // Always use doc.id as user_id to ensure uniqueness for React keys
             };
-            console.log(`[GET /api/groups/${params.groupId}/members] Member doc.id: ${doc.id}, member object:`, member);
+            console.log(`[GET /api/groups/${groupId}/members] Member doc.id: ${doc.id}, member object:`, member);
             return member;
         });
-        console.log(`[GET /api/groups/${params.groupId}/members] Returning ${members.length} members`);
+        console.log(`[GET /api/groups/${groupId}/members] Returning ${members.length} members`);
         return NextResponse.json(members);
     } catch (error) {
-        console.error(`[GET /api/groups/${params.groupId}/members] Error:`, error);
+        // params is a Promise so we can't log it directly in catch block easily without resolving it first which might fail
+        // Using generic error logging
+        console.error(`[GET /api/groups/members] Error:`, error);
         return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 });
     }
 }
 
-export async function POST(request: Request, { params }: { params: { groupId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ groupId: string }> }) {
     try {
+        const { groupId } = await params;
         const body = await request.json();
         const { user_id, user_name, user_email, role } = body;
 
@@ -31,7 +35,7 @@ export async function POST(request: Request, { params }: { params: { groupId: st
             return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
         }
 
-        await db.collection('groups').doc(params.groupId).collection('members').doc(user_id).set({
+        await db.collection('groups').doc(groupId).collection('members').doc(user_id).set({
             user_id: user_id,  // Critical: needed for role dropdown visibility check
             user_name,
             user_email,

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 
-export async function GET(request: Request, { params }: { params: { groupId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ groupId: string }> }) {
     try {
-        const doc = await db.collection('groups').doc(params.groupId).get();
+        const { groupId } = await params;
+        const doc = await db.collection('groups').doc(groupId).get();
         if (!doc.exists) {
             return NextResponse.json({ error: 'Group not found' }, { status: 404 });
         }
@@ -13,20 +14,22 @@ export async function GET(request: Request, { params }: { params: { groupId: str
     }
 }
 
-export async function PATCH(request: Request, { params }: { params: { groupId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ groupId: string }> }) {
     try {
+        const { groupId } = await params;
         const body = await request.json();
-        await db.collection('groups').doc(params.groupId).update(body);
+        await db.collection('groups').doc(groupId).update(body);
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to update group' }, { status: 500 });
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { groupId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ groupId: string }> }) {
     try {
+        const { groupId } = await params;
         // Delete all channels in the group
-        const channelsSnapshot = await db.collection('channels').where('group_id', '==', params.groupId).get();
+        const channelsSnapshot = await db.collection('channels').where('group_id', '==', groupId).get();
         const batch = db.batch();
 
         channelsSnapshot.docs.forEach(doc => {
@@ -34,7 +37,7 @@ export async function DELETE(request: Request, { params }: { params: { groupId: 
         });
 
         // Delete the group itself
-        const groupRef = db.collection('groups').doc(params.groupId);
+        const groupRef = db.collection('groups').doc(groupId);
         batch.delete(groupRef);
 
         await batch.commit();

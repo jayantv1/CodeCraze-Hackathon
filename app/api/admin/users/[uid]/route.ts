@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth as adminAuth, db as adminDb } from '@/lib/firebase-admin';
 
-export async function DELETE(request: Request, { params }: { params: { uid: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ uid: string }> }) {
     try {
-        const { uid } = params;
+        const { uid } = await params;
         await adminAuth.deleteUser(uid);
         await adminDb.collection('users').doc(uid).delete();
         return NextResponse.json({ success: true });
@@ -13,9 +13,9 @@ export async function DELETE(request: Request, { params }: { params: { uid: stri
     }
 }
 
-export async function PATCH(request: Request, { params }: { params: { uid: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ uid: string }> }) {
     try {
-        const { uid } = params;
+        const { uid } = await params;
         const body = await request.json();
         const { role } = body;
 
