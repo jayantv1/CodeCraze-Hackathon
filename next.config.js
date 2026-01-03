@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Ultra-lightweight build configuration
+  output: 'standalone',
+  productionBrowserSourceMaps: false,
+  poweredByHeader: false,
+
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
