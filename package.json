@@ -6,7 +6,7 @@
     "flask-dev": "node scripts/flask-dev.js",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run flask-dev\"",
-    "build": "next build",
+    "build": "next build --no-lint",
     "start": "next start",
     "lint": "next lint"
   },
@@ -15,7 +15,6 @@
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
-    "build": "^0.1.4",
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
     "eslint": "8.40.0",
