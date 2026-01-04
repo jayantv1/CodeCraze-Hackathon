@@ -2,6 +2,9 @@
   "name": "lumflare",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "flask-dev": "node scripts/flask-dev.js",
     "next-dev": "next dev",
