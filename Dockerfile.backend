@@ -1,0 +1,25 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt ./
+# Install CPU-only torch to reduce image size and build time
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install gunicorn
+
+COPY api ./api
+COPY lib ./lib
+COPY serviceAccountKey.json .
+# Copy .env.local if it exists (for local dev/testing within docker)
+# Note: For production on Lightsail, you should set environment variables in the Lightsail console.
+COPY .env.local* .env
+
+
+EXPOSE 5328
+
+ENV FLASK_APP=api/index.py
+
+# Run with Gunicorn
+# 1 worker usually enough for async/light loads, scale as needed
+CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:5328", "api.index:app"]

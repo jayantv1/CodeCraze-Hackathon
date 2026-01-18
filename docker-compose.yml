@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://backend:5328
+    depends_on:
+      - backend
+
+  backend:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5328:5328"

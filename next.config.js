@@ -2,6 +2,8 @@
 const nextConfig = {
   // Ultra-lightweight build configuration
   output: 'standalone',
+  // API_URL is used to proxy requests to the backend (e.g. in Docker)
+  // If not set, it falls back to localhost:5328 in dev or /api/ in prod (Vercel style)
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
 
@@ -22,9 +24,11 @@ const nextConfig = {
       {
         source: '/api/:path*',
         destination:
-          process.env.NODE_ENV === 'development'
-            ? 'http://127.0.0.1:5328/api/:path*'
-            : '/api/',
+          process.env.API_URL
+            ? `${process.env.API_URL}/api/:path*`
+            : process.env.NODE_ENV === 'development'
+              ? 'http://127.0.0.1:5328/api/:path*'
+              : '/api/',
       },
     ]
   },
